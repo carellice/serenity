@@ -1,0 +1,226 @@
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+:root {
+    --dark-bg: #121212;
+    --dark-section-bg: #1e1e1e;
+    --dark-text: #ffffff;
+    --dark-secondary-text: #b0b0b0;
+    --accent-color: #0a84ff;
+    --slider-bg: #3a3a3c;
+    --slider-thumb: #ffffff;
+}
+
+body {
+    background-color: var(--dark-bg);
+    color: var(--dark-text);
+    min-height: 100vh;
+    padding: 20px 0;
+}
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Header styles */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 10px 0;
+}
+
+h1 {
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+}
+
+h2 {
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--dark-text);
+    margin-bottom: 15px;
+    letter-spacing: -0.3px;
+}
+
+/* Sound category and item styles */
+.sound-category {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sound-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 8px 0;
+}
+
+.sound-info {
+    flex: 0 0 140px;
+    display: flex;
+    align-items: center;
+}
+
+.sound-info i {
+    width: 24px;
+    margin-right: 12px;
+    color: var(--dark-secondary-text);
+}
+
+.sound-info span {
+    font-size: 16px;
+    color: var(--dark-text);
+}
+
+/* Slider styles */
+.volume-slider {
+    flex: 1;
+}
+
+.slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--slider-bg);
+    outline: none;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--slider-thumb);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--slider-thumb);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border: none;
+}
+
+.slider::-webkit-slider-thumb:active {
+    transform: scale(1.2);
+    background: var(--accent-color);
+}
+
+.slider::-moz-range-thumb:active {
+    transform: scale(1.2);
+    background: var(--accent-color);
+}
+
+/* Timer styles */
+.timer-container {
+    position: relative;
+}
+
+#timer-btn {
+    background: transparent;
+    border: none;
+    color: var(--dark-text);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 8px;
+}
+
+#timer-modal {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: var(--dark-section-bg);
+    border-radius: 12px;
+    padding: 20px;
+    width: 250px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    z-index: 10;
+}
+
+#timer-modal h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.timer-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.timer-options button {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 8px;
+    color: var(--dark-text);
+    padding: 10px 0;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.timer-options button:hover, 
+.timer-options button.active {
+    background-color: var(--accent-color);
+}
+
+#timer-status {
+    text-align: center;
+    font-size: 14px;
+    color: var(--dark-secondary-text);
+}
+
+.hidden {
+    display: none;
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 20px 0;
+    font-size: 14px;
+    color: var(--dark-secondary-text);
+    margin-top: 40px;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+    .container {
+        padding: 0 15px;
+    }
+    
+    h1 {
+        font-size: 24px;
+    }
+    
+    h2 {
+        font-size: 20px;
+    }
+    
+    .sound-info {
+        flex: 0 0 120px;
+    }
+    
+    .sound-info span {
+        font-size: 15px;
+    }
+}

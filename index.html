@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serenity - Relaxing Sounds</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="icon.png" type="image/x-icon">
+    <link rel="shortcut icon" href="icon.png" type="image/x-icon">
+</head>
+<body class="dark-theme">
+    <div class="container">
+        <header>
+            <h1>Serenity</h1>
+            <div class="timer-container">
+                <button id="timer-btn"><i class="fas fa-clock"></i></button>
+                <div id="timer-modal" class="hidden">
+                    <h3>Sleep Timer</h3>
+                    <div class="timer-options">
+                        <button data-time="5">5 min</button>
+                        <button data-time="15">15 min</button>
+                        <button data-time="30">30 min</button>
+                        <button data-time="60">1 hour</button>
+                        <button data-time="0">Off</button>
+                    </div>
+                    <p id="timer-status">No timer set</p>
+                </div>
+            </div>
+        </header>
+
+        <section class="sound-category">
+            <h2>Anti Sound</h2>
+            <div class="sound-item">
+                <div class="sound-info">
+                    <i class="fas fa-wave-square"></i>
+                    <span>White Noise</span>
+                </div>
+                <div class="volume-slider">
+                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="white-noise.mp3">
+                </div>
+            </div>
+            <div class="sound-item">
+                <div class="sound-info">
+                    <i class="fas fa-wave-square"></i>
+                    <span>Brown Noise</span>
+                </div>
+                <div class="volume-slider">
+                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="brown-noise.mp3">
+                </div>
+            </div>
+            <div class="sound-item">
+                <div class="sound-info">
+                    <i class="fas fa-wave-square"></i>
+                    <span>Pink Noise</span>
+                </div>
+                <div class="volume-slider">
+                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="pink-noise.mp3">
+                </div>
+            </div>
+        </section>
+
+        <section class="sound-category">
+            <h2>Nature</h2>
+            <div class="sound-item">
+                <div class="sound-info">
+                    <i class="fas fa-cloud-rain"></i>
+                    <span>Rain</span>
+                </div>
+                <div class="volume-slider">
+                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="rain.wav">
+                </div>
+            </div>
+            <div class="sound-item">
+                <div class="sound-info">
+                    <i class="fas fa-bolt"></i>
+                    <span>Storm</span>
+                </div>
+                <div class="volume-slider">
+                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="storm.mp3">
+                </div>
+            </div>
+            <div class="sound-item">
+                <div class="sound-info">
+                    <i class="fas fa-wind"></i>
+                    <span>Wind</span>
+                </div>
+                <div class="volume-slider">
+                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="wind.mp3">
+                </div>
+            </div>
+            <div class="sound-item">
+                <div class="sound-info">
+                    <i class="fas fa-water"></i>
+                    <span>Stream</span>
+                </div>
+                <div class="volume-slider">
+                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="stream.mp3">
+                </div>
+            </div>
+            <div class="sound-item">
+                <div class="sound-info">
+                    <i class="fas fa-dove"></i>
+                    <span>Birds</span>
+                </div>
+                <div class="volume-slider">
+                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="birds.mp3">
+                </div>
+            </div>
+            <div class="sound-item">
+                <div class="sound-info">
+                    <i class="fas fa-water"></i>
+                    <span>Waves</span>
+                </div>
+                <div class="volume-slider">
+                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="waves.mp3">
+                </div>
+            </div>
+        </section>
+
+        <section class="sound-category">
+            <h2>Travel</h2>
+            <div class="sound-item">
+                <div class="sound-info">
+                    <i class="fas fa-ship"></i>
+                    <span>Boat</span>
+                </div>
+                <div class="volume-slider">
+                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="boat.mp3">
+                </div>
+            </div>
+            <div class="sound-item">
+                <div class="sound-info">
+                    <i class="fas fa-city"></i>
+                    <span>City</span>
+                </div>
+                <div class="volume-slider">
+                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="city.mp3">
+                </div>
+            </div>
+        </section>
+
+        <section class="sound-category">
+            <h2>Interiors</h2>
+            <div class="sound-item">
+                <div class="sound-info">
+                    <i class="fas fa-fire"></i>
+                    <span>Fireplace</span>
+                </div>
+                <div class="volume-slider">
+                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="fireplace.mp3">
+                </div>
+            </div>
+            <div class="sound-item">
+                <div class="sound-info">
+                    <i class="fas fa-temperature-full"></i>
+                    <span>Hair Dryer</span>
+                </div>
+                <div class="volume-slider">
+                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="hair-dryer.mp3">
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>© 2025 Serenity - Relaxing Sounds</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
