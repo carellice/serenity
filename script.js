@@ -19,6 +19,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Oggetto per memorizzare i suoni precaricati
     const sounds = {};
     
+    // Flag per sapere se l'audio è stato sbloccato
+    let audioUnlocked = false;
+    
     // Indicatore di caricamento
     const loadingElement = document.createElement('div');
     loadingElement.className = 'loading-overlay';
@@ -42,13 +45,58 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Se tutti i file sono stati caricati, nascondi l'indicatore di caricamento
         if (loadedCount === soundFiles.length) {
-            setTimeout(() => {
+            // Aggiungi un pulsante per sbloccare l'audio sui dispositivi mobili
+            const unlockButton = document.createElement('button');
+            unlockButton.className = 'unlock-audio-button';
+            unlockButton.textContent = 'Inizia a Rilassarti';
+            unlockButton.addEventListener('click', function() {
+                unlockAudio();
                 loadingElement.style.opacity = '0';
                 setTimeout(() => {
                     loadingElement.remove();
                 }, 500);
-            }, 500);
+            });
+            
+            const loadingContainer = document.querySelector('.loading-container');
+            loadingContainer.appendChild(unlockButton);
         }
+    }
+
+    // Funzione per sbloccare l'audio sui dispositivi mobili
+    function unlockAudio() {
+        if (audioUnlocked) return;
+        
+        // Crea un context audio temporaneo
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioContext = new AudioContext();
+        
+        // Crea un buffer vuoto
+        const buffer = audioContext.createBuffer(1, 1, 22050);
+        const source = audioContext.createBufferSource();
+        source.buffer = buffer;
+        source.connect(audioContext.destination);
+        
+        // Riproduci il buffer (risolve il problema sui dispositivi iOS)
+        source.start(0);
+        
+        // Risolve il problema sui dispositivi Android
+        // Avvia e mette subito in pausa tutti i suoni
+        for (const sound in sounds) {
+            if (sounds[sound] && sounds[sound].element) {
+                const promise = sounds[sound].element.play();
+                if (promise !== undefined) {
+                    promise.then(() => {
+                        sounds[sound].element.pause();
+                        sounds[sound].element.currentTime = 0;
+                    }).catch(error => {
+                        console.error(`Errore durante lo sblocco dell'audio per ${sound}:`, error);
+                    });
+                }
+            }
+        }
+        
+        audioUnlocked = true;
+        console.log('Audio sbloccato con successo');
     }
 
     // Funzione per precaricare un file audio
@@ -63,6 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error(`Errore nel caricare: ${url}`, error);
                 reject(error);
             });
+            audio.preload = 'auto'; // Forza il precaricamento
             audio.src = url;
             audio.load();
         });
@@ -70,8 +119,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Carica tutti i file audio in parallelo
     Promise.all(soundFiles.map(file => {
-        // let soundId = file.replace('.mp3', '');
-        let soundId = file;
+        // const soundId = file.replace('.mp3', '');
+        const soundId = file;
         return preloadAudio(`sounds/${file}`)
             .then(audio => {
                 // Impostazioni audio
@@ -127,6 +176,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 const soundId = this.dataset.sound;
                 const volume = this.value / 100;
                 
+                // Se l'audio non è stato sbloccato, fallo adesso
+                if (!audioUnlocked) {
+                    unlockAudio();
+                }
+                
                 // Imposta il volume
                 if (sounds[soundId]) {
                     sounds[soundId].volume = volume;
@@ -134,16 +188,40 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     // Avvia o ferma l'audio in base al volume
                     if (volume > 0 && sounds[soundId].element.paused) {
-                        sounds[soundId].element.play().catch(error => {
-                            console.error(`Errore durante la riproduzione di ${soundId}:`, error);
-                        });
+                        const playPromise = sounds[soundId].element.play();
+                        if (playPromise !== undefined) {
+                            playPromise.catch(error => {
+                                console.error(`Errore durante la riproduzione di ${soundId}:`, error);
+                                // Riprova a sbloccare l'audio e riprodurre
+                                unlockAudio();
+                                setTimeout(() => {
+                                    sounds[soundId].element.play().catch(e => {
+                                        console.error(`Secondo tentativo fallito per ${soundId}:`, e);
+                                    });
+                                }, 100);
+                            });
+                        }
                     } else if (volume === 0 && !sounds[soundId].element.paused) {
                         sounds[soundId].element.pause();
                         sounds[soundId].element.currentTime = 0;
                     }
                 }
             });
+            
+            // Evento touchstart per Android/iOS
+            slider.addEventListener('touchstart', function() {
+                if (!audioUnlocked) {
+                    unlockAudio();
+                }
+            }, {once: true});
         });
+
+        // Aggiungi un evento di tocco al documento per sbloccare l'audio
+        document.addEventListener('touchstart', function() {
+            if (!audioUnlocked) {
+                unlockAudio();
+            }
+        }, {once: true});
 
         // Gestione migliorata del timer
         const timerBtn = document.getElementById('timer-btn');

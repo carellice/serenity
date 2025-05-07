@@ -266,3 +266,24 @@ footer {
         transform: rotate(360deg);
     }
 }
+
+.unlock-audio-button {
+    margin-top: 20px;
+    padding: 12px 24px;
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.unlock-audio-button:hover {
+    background-color: #0070e0;
+}
+
+.unlock-audio-button:active {
+    transform: scale(0.98);
+}
