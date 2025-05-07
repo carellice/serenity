@@ -287,3 +287,138 @@ footer {
 .unlock-audio-button:active {
     transform: scale(0.98);
 }
+
+/* Migliora gli slider per i dispositivi touch */
+.slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 8px; /* Aumentato lo spessore */
+    border-radius: 4px;
+    background: var(--slider-bg);
+    outline: none;
+    opacity: 0.9;
+    transition: opacity 0.2s;
+    margin: 10px 0; /* Aggiunto margine sopra e sotto */
+}
+
+.slider:hover {
+    opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 28px; /* Aumentato per maggiore facilità sui touch */
+    height: 28px; /* Aumentato per maggiore facilità sui touch */
+    border-radius: 50%;
+    background: var(--slider-thumb);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); /* Aggiunta ombra per effetto 3D */
+    transition: all 0.15s ease;
+}
+
+.slider::-moz-range-thumb {
+    width: 28px; /* Aumentato per maggiore facilità sui touch */
+    height: 28px; /* Aumentato per maggiore facilità sui touch */
+    border-radius: 50%;
+    background: var(--slider-thumb);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); /* Aggiunta ombra per effetto 3D */
+    transition: all 0.15s ease;
+    border: none;
+}
+
+.slider::-webkit-slider-thumb:active {
+    transform: scale(1.1);
+    background: var(--accent-color);
+}
+
+.slider::-moz-range-thumb:active {
+    transform: scale(1.1);
+    background: var(--accent-color);
+}
+
+/* Stile per gli elementi audio e la loro area di contatto */
+.sound-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px; /* Aumentato lo spazio tra gli elementi */
+    padding: 12px 0; /* Aumentato il padding verticale */
+    border-radius: 8px; /* Bordi arrotondati */
+    transition: background-color 0.2s;
+}
+
+.sound-item:active {
+    background-color: rgba(255, 255, 255, 0.05); /* Effetto leggero quando attivo */
+}
+
+.sound-info {
+    flex: 0 0 140px;
+    display: flex;
+    align-items: center;
+    padding-left: 12px; /* Aumentato il padding a sinistra */
+}
+
+.sound-info i {
+    width: 28px; /* Icona più grande */
+    font-size: 18px; /* Testo più grande */
+    margin-right: 15px;
+    color: var(--dark-secondary-text);
+}
+
+.sound-info span {
+    font-size: 17px; /* Testo più grande */
+    color: var(--dark-text);
+}
+
+.volume-slider {
+    flex: 1;
+    padding: 0 15px; /* Padding laterale per aumentare l'area cliccabile */
+}
+
+/* Extra CSS per il pulsante di sblocco audio */
+.unlock-audio-button {
+    margin-top: 20px;
+    padding: 15px 30px; /* Pulsante più grande */
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px; /* Testo più grande */
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(10, 132, 255, 0.3); /* Ombra blu per effetto 3D */
+}
+
+.unlock-audio-button:hover {
+    background-color: #0070e0;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(10, 132, 255, 0.4);
+}
+
+.unlock-audio-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(10, 132, 255, 0.3);
+}
+
+/* Miglioramento per dispositivi mobili */
+@media (max-width: 480px) {
+    .slider::-webkit-slider-thumb, 
+    .slider::-moz-range-thumb {
+        width: 30px; /* Ancora più grande su mobile */
+        height: 30px; /* Ancora più grande su mobile */
+    }
+    
+    .slider {
+        height: 10px; /* Barra più spessa su mobile */
+    }
+    
+    .sound-item {
+        padding: 14px 0; /* Più spazio su mobile */
+    }
+    
+    .sound-info {
+        flex: 0 0 120px; /* Ridotto leggermente su schermi piccoli */
+    }
+}

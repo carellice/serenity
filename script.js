@@ -68,30 +68,49 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Crea un context audio temporaneo
         const AudioContext = window.AudioContext || window.webkitAudioContext;
-        const audioContext = new AudioContext();
-        
-        // Crea un buffer vuoto
-        const buffer = audioContext.createBuffer(1, 1, 22050);
-        const source = audioContext.createBufferSource();
-        source.buffer = buffer;
-        source.connect(audioContext.destination);
-        
-        // Riproduci il buffer (risolve il problema sui dispositivi iOS)
-        source.start(0);
+        if (AudioContext) {
+            const audioContext = new AudioContext();
+            
+            // Crea un buffer vuoto
+            const buffer = audioContext.createBuffer(1, 1, 22050);
+            const source = audioContext.createBufferSource();
+            source.buffer = buffer;
+            source.connect(audioContext.destination);
+            
+            // Riproduci il buffer (risolve il problema sui dispositivi iOS)
+            if (source.start) {
+                source.start(0);
+            } else if (source.noteOn) {
+                source.noteOn(0);
+            }
+        }
         
         // Risolve il problema sui dispositivi Android
         // Avvia e mette subito in pausa tutti i suoni
+        const silentPlay = function(sound) {
+            // Salva il volume attuale e imposta a 0
+            const originalVolume = sounds[sound].element.volume;
+            sounds[sound].element.volume = 0;
+            
+            const playPromise = sounds[sound].element.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    sounds[sound].element.pause();
+                    sounds[sound].element.currentTime = 0;
+                    // Ripristina il volume originale
+                    sounds[sound].element.volume = originalVolume;
+                }).catch(error => {
+                    console.warn(`Silent play non riuscito per ${sound}, è normale su alcuni browser:`, error);
+                    // Ripristina il volume originale anche in caso di errore
+                    sounds[sound].element.volume = originalVolume;
+                });
+            }
+        };
+        
+        // Prova a riprodurre silenziosamente ogni suono
         for (const sound in sounds) {
             if (sounds[sound] && sounds[sound].element) {
-                const promise = sounds[sound].element.play();
-                if (promise !== undefined) {
-                    promise.then(() => {
-                        sounds[sound].element.pause();
-                        sounds[sound].element.currentTime = 0;
-                    }).catch(error => {
-                        console.error(`Errore durante lo sblocco dell'audio per ${sound}:`, error);
-                    });
-                }
+                silentPlay(sound);
             }
         }
         
@@ -172,9 +191,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Gestione degli slider per il volume
         const sliders = document.querySelectorAll('.slider');
         sliders.forEach(slider => {
-            slider.addEventListener('input', function() {
-                const soundId = this.dataset.sound;
-                const volume = this.value / 100;
+            // Funzione per gestire il cambiamento del volume
+            function handleVolumeChange() {
+                const soundId = slider.dataset.sound;
+                const volume = slider.value / 100;
                 
                 // Se l'audio non è stato sbloccato, fallo adesso
                 if (!audioUnlocked) {
@@ -206,14 +226,21 @@ document.addEventListener('DOMContentLoaded', function() {
                         sounds[soundId].element.currentTime = 0;
                     }
                 }
-            });
+            }
             
-            // Evento touchstart per Android/iOS
+            // Aggiungi molteplici event listener per assicurarti che l'evento sia catturato
+            slider.addEventListener('input', handleVolumeChange);
+            slider.addEventListener('change', handleVolumeChange);
+            
+            // Speciale handling per i dispositivi touch
             slider.addEventListener('touchstart', function() {
                 if (!audioUnlocked) {
                     unlockAudio();
                 }
-            }, {once: true});
+            });
+            
+            slider.addEventListener('touchend', handleVolumeChange);
+            slider.addEventListener('touchmove', handleVolumeChange);
         });
 
         // Aggiungi un evento di tocco al documento per sbloccare l'audio
