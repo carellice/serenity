@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
         'hair-dryer.mp3'
     ];
 
-    // Oggetto per memorizzare i suoni precaricati
+    // Oggetto per memorizzare i suoni
     const sounds = {};
     
     // Flag per sapere se l'audio è stato sbloccato
@@ -25,6 +25,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Verifica se il dispositivo è un iOS
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     console.log("Dispositivo iOS rilevato:", isIOS);
+    
+    // AudioContext globale per iOS
+    let audioContext = null;
+    
+    // Nodi gain per iOS
+    const gainNodes = {};
     
     // Indicatore di caricamento
     const loadingElement = document.createElement('div');
@@ -49,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Se tutti i file sono stati caricati, nascondi l'indicatore di caricamento
         if (loadedCount === soundFiles.length) {
-            // Aggiungi un pulsante per sbloccare l'audio sui dispositivi mobili
+            // Aggiungi un pulsante per sbloccare l'audio
             const unlockButton = document.createElement('button');
             unlockButton.className = 'unlock-audio-button';
             unlockButton.textContent = isIOS ? 'Tocca qui per iniziare (iOS)' : 'Inizia a Rilassarti';
@@ -66,42 +72,75 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Funzione specifica per sbloccare l'audio su iOS
+    // Inizializza l'AudioContext per iOS
+    function initAudioContextiOS() {
+        if (audioContext) return;
+        
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            audioContext = new AudioContext();
+            console.log("AudioContext creato per iOS:", audioContext.state);
+            
+            // Resume AudioContext se necessario
+            if (audioContext.state === 'suspended') {
+                audioContext.resume().then(() => {
+                    console.log("AudioContext resumed:", audioContext.state);
+                });
+            }
+        } catch (e) {
+            console.error("Errore creazione AudioContext:", e);
+        }
+    }
+
+    // Carica un buffer audio per iOS
+    function loadAudioBufferiOS(url) {
+        return new Promise((resolve, reject) => {
+            if (!audioContext) {
+                initAudioContextiOS();
+            }
+            
+            // Fetch del file audio
+            fetch(url)
+                .then(response => response.arrayBuffer())
+                .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
+                .then(audioBuffer => {
+                    resolve(audioBuffer);
+                })
+                .catch(error => {
+                    console.error(`Errore caricamento buffer audio ${url}:`, error);
+                    reject(error);
+                });
+        });
+    }
+
+    // Funzione per sbloccare l'audio su iOS
     function unlockIOSAudio() {
         console.log("Tentativo di sblocco audio iOS...");
         
-        // Per iOS, creiamo un singolo audio per sbloccare il contesto audio
-        const unlockAudio = new Audio();
-        unlockAudio.src = 'data:audio/mp3;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsRbAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV';
+        if (!audioContext) {
+            initAudioContextiOS();
+        }
         
-        // Play e immediatamente pausa l'audio
-        const playPromise = unlockAudio.play();
-        if (playPromise !== undefined) {
-            playPromise.then(() => {
-                console.log("Sblocco iOS riuscito!");
-                unlockAudio.pause();
-                unlockAudio.currentTime = 0;
-                
-                // Ora tenta di inizializzare tutti i suoni veri
-                for (const sound in sounds) {
-                    if (sounds[sound] && sounds[sound].element) {
-                        // Riproduci silenziosamente e pausa per sbloccare
-                        sounds[sound].element.volume = 0;
-                        sounds[sound].element.play().then(() => {
-                            sounds[sound].element.pause();
-                            sounds[sound].element.currentTime = 0;
-                            // Ripristina il volume solo se necessario
-                            if (sounds[sound].volume > 0) {
-                                sounds[sound].element.volume = sounds[sound].volume;
-                            }
-                        }).catch(e => {
-                            console.warn(`Non è stato possibile sbloccare ${sound} su iOS: ${e}`);
-                        });
-                    }
-                }
-            }).catch(error => {
-                console.error("Errore sblocco iOS:", error);
-            });
+        // Su iOS, creiamo un breve suono per sbloccare il contesto audio
+        if (audioContext) {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            gainNode.gain.value = 0.001; // Volume quasi inudibile
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.start(0);
+            oscillator.stop(0.001);
+            
+            // Resume AudioContext in response to user gesture
+            if (audioContext.state === 'suspended') {
+                audioContext.resume().then(() => {
+                    console.log("AudioContext resumed after unlock:", audioContext.state);
+                });
+            }
+            
+            console.log("iOS audio unlock attempted");
         }
     }
 
@@ -111,36 +150,17 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (isIOS) {
             unlockIOSAudio();
-        } else {
-            // Approccio standard per altri browser
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            if (AudioContext) {
-                try {
-                    const audioContext = new AudioContext();
-                    const buffer = audioContext.createBuffer(1, 1, 22050);
-                    const source = audioContext.createBufferSource();
-                    source.buffer = buffer;
-                    source.connect(audioContext.destination);
-                    
-                    if (source.start) {
-                        source.start(0);
-                    } else if (source.noteOn) {
-                        source.noteOn(0);
-                    }
-                    
-                    // Resume AudioContext (necessario in Chrome)
-                    if (audioContext.state === 'suspended') {
-                        audioContext.resume();
-                    }
-                } catch (e) {
-                    console.warn("Errore AudioContext:", e);
+            
+            // Inizializza tutti i nodi per i suoni
+            for (const soundId in sounds) {
+                if (sounds[soundId] && sounds[soundId].buffer) {
+                    setupAudioNodesiOS(soundId);
                 }
             }
-            
-            // Approccio tradizionale
+        } else {
+            // Approccio standard per altri browser
             for (const sound in sounds) {
                 if (sounds[sound] && sounds[sound].element) {
-                    // Salva e ripristina il volume
                     const originalVolume = sounds[sound].element.volume;
                     sounds[sound].element.volume = 0;
                     
@@ -160,177 +180,266 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Audio sbloccato con successo');
     }
 
-    // Funzione per precaricare un file audio
-    function preloadAudio(url) {
-        return new Promise((resolve, reject) => {
-            const audio = new Audio();
+    // Configurazione dei nodi audio per iOS
+    function setupAudioNodesiOS(soundId) {
+        if (!audioContext || !sounds[soundId] || !sounds[soundId].buffer) return;
+        
+        try {
+            // Creiamo nodi audio freschi ogni volta
+            const source = audioContext.createBufferSource();
+            source.buffer = sounds[soundId].buffer;
+            source.loop = true;
             
-            // Evento che indica che l'audio può essere riprodotto
-            audio.addEventListener('canplaythrough', () => {
-                resolve(audio);
-            }, {once: true});
+            // Crea gain node
+            const gainNode = audioContext.createGain();
+            gainNode.gain.value = 0; // Inizia muto
             
-            // Gestione degli errori
-            audio.addEventListener('error', (error) => {
-                console.error(`Errore nel caricare: ${url}`, error);
-                reject(error);
+            // Connetti i nodi
+            source.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // Memorizza i nodi
+            sounds[soundId].source = source;
+            gainNodes[soundId] = gainNode;
+            sounds[soundId].playing = false;
+            sounds[soundId].volume = 0;
+            
+            console.log(`Nodi audio configurati per ${soundId}`);
+        } catch (e) {
+            console.error(`Errore configurazione nodi audio per ${soundId}:`, e);
+        }
+    }
+
+    // Gestione playback per iOS con Web Audio API
+    function playIOSSoundWithWebAudio(soundId, volume) {
+        if (!audioContext || !sounds[soundId]) return;
+        
+        // Assicurati che l'AudioContext sia attivo
+        if (audioContext.state === 'suspended') {
+            audioContext.resume();
+        }
+        
+        // Memorizza il volume desiderato
+        sounds[soundId].volume = volume;
+        
+        // Se il volume è 0 e sta suonando, ferma
+        if (volume === 0 && sounds[soundId].playing) {
+            try {
+                if (sounds[soundId].source) {
+                    sounds[soundId].source.stop();
+                }
+                sounds[soundId].playing = false;
+                console.log(`Fermato suono ${soundId}`);
+                
+                // Prepara nuovi nodi
+                setupAudioNodesiOS(soundId);
+            } catch (e) {
+                console.warn(`Errore fermando ${soundId}:`, e);
+            }
+            return;
+        }
+        
+        // Se il volume > 0 ma non sta suonando, avvia
+        if (volume > 0 && !sounds[soundId].playing) {
+            try {
+                // Prepara nuovi nodi se necessario
+                if (!sounds[soundId].source) {
+                    setupAudioNodesiOS(soundId);
+                }
+                
+                // Imposta il volume
+                if (gainNodes[soundId]) {
+                    gainNodes[soundId].gain.value = volume;
+                }
+                
+                // Avvia il suono
+                sounds[soundId].source.start();
+                sounds[soundId].playing = true;
+                console.log(`Avviato suono ${soundId} con volume ${volume}`);
+            } catch (e) {
+                console.error(`Errore avviando ${soundId}:`, e);
+                // Riprova a configurare e avviare
+                setupAudioNodesiOS(soundId);
+                try {
+                    if (gainNodes[soundId]) {
+                        gainNodes[soundId].gain.value = volume;
+                    }
+                    sounds[soundId].source.start();
+                    sounds[soundId].playing = true;
+                } catch (retryError) {
+                    console.error(`Secondo tentativo fallito per ${soundId}:`, retryError);
+                }
+            }
+        } 
+        // Se sta già suonando, aggiorna solo il volume
+        else if (volume > 0 && sounds[soundId].playing) {
+            if (gainNodes[soundId]) {
+                gainNodes[soundId].gain.value = volume;
+                console.log(`Aggiornato volume di ${soundId} a ${volume}`);
+            }
+        }
+    }
+
+    // Approccio standard per dispositivi non-iOS
+    function playStandardSound(soundId, volume) {
+        const sound = sounds[soundId];
+        if (!sound || !sound.element) return;
+        
+        // Imposta il volume
+        sound.volume = volume;
+        sound.element.volume = volume;
+        
+        // Avvia o ferma l'audio in base al volume
+        if (volume > 0 && sound.element.paused) {
+            sound.element.play().catch(error => {
+                console.error(`Errore durante la riproduzione di ${soundId}:`, error);
+                
+                // Riprova dopo un breve momento
+                setTimeout(() => {
+                    sound.element.play().catch(e => {
+                        console.error(`Secondo tentativo fallito per ${soundId}:`, e);
+                    });
+                }, 100);
             });
-            
-            // Impostazioni per il precaricamento
-            audio.preload = 'auto';
-            audio.src = url;
-            audio.load();
+            sound.playing = true;
+        } else if (volume === 0 && !sound.element.paused) {
+            sound.element.pause();
+            sound.element.currentTime = 0;
+            sound.playing = false;
+        }
+    }
+
+    // Funzione per precaricare un file audio (approccio diverso per iOS)
+    function preloadAudio(url, soundId) {
+        if (isIOS) {
+            // Approccio Web Audio API per iOS
+            return loadAudioBufferiOS(`sounds/${soundId}`)
+                .then(buffer => {
+                    sounds[soundId] = {
+                        buffer: buffer,
+                        volume: 0,
+                        playing: false
+                    };
+                    
+                    // Preconfiguriamo i nodi audio per questo suono
+                    setupAudioNodesiOS(soundId);
+                    
+                    return buffer;
+                });
+        } else {
+            // Approccio standard per altri browser
+            return new Promise((resolve, reject) => {
+                const audio = new Audio();
+                
+                audio.addEventListener('canplaythrough', () => {
+                    resolve(audio);
+                }, {once: true});
+                
+                audio.addEventListener('error', (error) => {
+                    console.error(`Errore nel caricare: ${url}`, error);
+                    reject(error);
+                });
+                
+                audio.preload = 'auto';
+                audio.src = url;
+                audio.loop = true;
+                audio.volume = 0;
+                audio.load();
+            });
+        }
+    }
+
+    // Precarica tutti i suoni
+    if (isIOS) {
+        // Per iOS inizializziamo prima l'AudioContext
+        initAudioContextiOS();
+        
+        // Poi carichiamo ogni suono
+        const loadPromises = soundFiles.map(file => {
+            const soundId = file;
+            return loadAudioBufferiOS(`sounds/${file}`)
+                .then(buffer => {
+                    sounds[soundId] = {
+                        buffer: buffer,
+                        volume: 0,
+                        playing: false
+                    };
+                    updateLoadingProgress();
+                    return buffer;
+                })
+                .catch(error => {
+                    console.error(`Errore caricamento ${file}:`, error);
+                    updateLoadingProgress();
+                    sounds[soundId] = {
+                        buffer: null,
+                        volume: 0,
+                        playing: false
+                    };
+                });
+        });
+        
+        Promise.all(loadPromises)
+            .then(() => {
+                console.log('Tutti i buffer audio caricati per iOS');
+                initializeSliders();
+            })
+            .catch(error => {
+                console.error('Errore caricamento buffer:', error);
+                initializeSliders();
+            });
+    } else {
+        // Approccio standard per altri browser
+        Promise.all(soundFiles.map(file => {
+            const soundId = file;
+            return preloadAudio(`sounds/${file}`)
+                .then(audio => {
+                    sounds[soundId] = { 
+                        element: audio, 
+                        volume: 0,
+                        playing: false
+                    };
+                    
+                    // Soluzione per il gap nel loop
+                    audio.addEventListener('timeupdate', function() {
+                        const buffer = 0.44; // Buffer di 440ms prima della fine
+                        if (this.currentTime > this.duration - buffer) {
+                            this.currentTime = 0;
+                        }
+                    });
+                    
+                    updateLoadingProgress();
+                    return audio;
+                })
+                .catch(error => {
+                    updateLoadingProgress();
+                    sounds[soundId] = { 
+                        element: new Audio(), 
+                        volume: 0,
+                        playing: false
+                    };
+                });
+        }))
+        .then(() => {
+            console.log('Tutti i suoni precaricati con successo');
+            initializeSliders();
+        })
+        .catch(error => {
+            console.error('Errore nel precaricamento:', error);
+            initializeSliders();
         });
     }
 
-    // Carica tutti i file audio in parallelo
-    Promise.all(soundFiles.map(file => {
-        // const soundId = file.replace('.mp3', '');
-        const soundId = file;
-        return preloadAudio(`sounds/${file}`)
-            .then(audio => {
-                // Impostazioni audio
-                audio.loop = true;
-                audio.volume = 0;
-                
-                // Memorizza l'audio precaricato
-                sounds[soundId] = { 
-                    element: audio, 
-                    volume: 0,
-                    playing: false // Aggiungi uno stato di riproduzione
-                };
-                
-                // Soluzione per il gap nel loop
-                audio.addEventListener('timeupdate', function() {
-                    const buffer = 0.44; // Buffer di 440ms prima della fine
-                    if (this.currentTime > this.duration - buffer) {
-                        this.currentTime = 0;
-                    }
-                });
-                
-                // Aggiorna il progresso
-                updateLoadingProgress();
-                
-                return audio;
-            })
-            .catch(error => {
-                // Aggiorna comunque il progresso anche in caso di errore
-                updateLoadingProgress();
-                // Crea un audio vuoto per non interrompere la funzionalità
-                sounds[soundId] = { 
-                    element: new Audio(), 
-                    volume: 0,
-                    playing: false
-                };
-            });
-    }))
-    .then(() => {
-        console.log('Tutti i suoni sono stati precaricati con successo');
-        // Inizializza gli slider ora che i suoni sono caricati
-        initializeSliders();
-    })
-    .catch(error => {
-        console.error('Si è verificato un errore nel precaricamento dei suoni', error);
-        // Inizializza comunque gli slider
-        initializeSliders();
-    });
-
-    // Inizializza gli slider e altri controlli
+    // Inizializza gli slider
     function initializeSliders() {
-        // Gestione degli slider per il volume
         const sliders = document.querySelectorAll('.slider');
         
-        // Funzione specializzata per la riproduzione su iOS
-        function playIOSSound(soundId, volume) {
-            const sound = sounds[soundId];
-            if (!sound) return;
-            
-            // Se il volume è 0, ferma la riproduzione
-            if (volume === 0) {
-                if (sound.playing) {
-                    sound.element.pause();
-                    sound.element.currentTime = 0;
-                    sound.playing = false;
-                }
-                sound.volume = 0;
-                return;
-            }
-            
-            // Imposta il volume
-            sound.volume = volume;
-            sound.element.volume = volume;
-            
-            // Se non è in riproduzione, avvia
-            if (!sound.playing) {
-                console.log(`Avvio della riproduzione di ${soundId} con volume ${volume}`);
-                
-                // Su iOS dobbiamo assicurarci che l'audio sia completamente sbloccato
-                if (!audioUnlocked) {
-                    unlockAudio();
-                    // Breve attesa per lo sblocco
-                    setTimeout(() => {
-                        sound.element.play().then(() => {
-                            sound.playing = true;
-                        }).catch(error => {
-                            console.error(`Errore durante la riproduzione di ${soundId}:`, error);
-                            
-                            // Secondo tentativo dopo un ulteriore sblocco
-                            unlockAudio();
-                            setTimeout(() => {
-                                sound.element.play().catch(e => {
-                                    console.error(`Secondo tentativo fallito per ${soundId}:`, e);
-                                });
-                            }, 500);
-                        });
-                    }, 100);
-                } else {
-                    sound.element.play().then(() => {
-                        sound.playing = true;
-                    }).catch(error => {
-                        console.error(`Errore durante la riproduzione di ${soundId}:`, error);
-                    });
-                }
-            }
-        }
-        
-        // Funzione per dispositivi non-iOS
-        function playStandardSound(soundId, volume) {
-            const sound = sounds[soundId];
-            if (!sound) return;
-            
-            // Imposta il volume
-            sound.volume = volume;
-            sound.element.volume = volume;
-            
-            // Avvia o ferma l'audio in base al volume
-            if (volume > 0 && sound.element.paused) {
-                sound.element.play().catch(error => {
-                    console.error(`Errore durante la riproduzione di ${soundId}:`, error);
-                    
-                    // Riprova a sbloccare l'audio e riprodurre
-                    unlockAudio();
-                    setTimeout(() => {
-                        sound.element.play().catch(e => {
-                            console.error(`Secondo tentativo fallito per ${soundId}:`, e);
-                        });
-                    }, 100);
-                });
-                sound.playing = true;
-            } else if (volume === 0 && !sound.element.paused) {
-                sound.element.pause();
-                sound.element.currentTime = 0;
-                sound.playing = false;
-            }
-        }
-        
-        // Funzione comune per gestire il cambiamento del volume
+        // Funzione comune per gestire i cambiamenti di volume
         function handleVolumeChange(slider) {
             const soundId = slider.dataset.sound;
             const volume = slider.value / 100;
             
-            // Diverse strategie per iOS e altri dispositivi
             if (isIOS) {
-                playIOSSound(soundId, volume);
+                playIOSSoundWithWebAudio(soundId, volume);
             } else {
                 playStandardSound(soundId, volume);
             }
@@ -338,38 +447,63 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Aggiungi event listener a tutti gli slider
         sliders.forEach(slider => {
+            // Per iOS, aggiungi un evento di click diretto che farà sbloccare l'audio
+            if (isIOS) {
+                slider.addEventListener('click', function(e) {
+                    // Sblocca l'audio al primo click
+                    if (!audioUnlocked) {
+                        unlockAudio();
+                    }
+                    
+                    // Calcola la posizione relativa del click
+                    const rect = this.getBoundingClientRect();
+                    const clickPosition = e.clientX - rect.left;
+                    const newValue = Math.round((clickPosition / rect.width) * 100);
+                    
+                    // Limita il valore tra 0 e 100
+                    this.value = Math.max(0, Math.min(100, newValue));
+                    handleVolumeChange(this);
+                });
+            }
+            
             // Evento principale per i cambiamenti di input
             slider.addEventListener('input', function() {
                 handleVolumeChange(this);
             });
             
-            // Evento al rilascio (change)
+            // Altri eventi standard
             slider.addEventListener('change', function() {
                 handleVolumeChange(this);
             });
             
-            // Per dispositivi touch
             slider.addEventListener('touchend', function() {
                 handleVolumeChange(this);
             });
             
-            // Sbloccare l'audio al primo touch
+            // Sblocco audio al primo touch
             slider.addEventListener('touchstart', function() {
                 if (!audioUnlocked) {
                     unlockAudio();
                 }
             });
             
-            // Gestione dell'evento touchmove per iOS
+            // Per iOS, touch events specifici
             if (isIOS) {
-                slider.addEventListener('touchmove', function() {
+                slider.addEventListener('touchmove', function(e) {
+                    // Calcola la posizione relativa del touch
+                    const rect = this.getBoundingClientRect();
+                    const touchPosition = e.touches[0].clientX - rect.left;
+                    const newValue = Math.round((touchPosition / rect.width) * 100);
+                    
+                    // Limita il valore tra 0 e 100
+                    this.value = Math.max(0, Math.min(100, newValue));
                     handleVolumeChange(this);
+                    
+                    // Previeni lo scroll
+                    e.preventDefault();
                 });
-            }
-            
-            // Crea una versione potenziata dello slider solo per iOS
-            if (isIOS) {
-                // Aggiungi un overlay cliccabile sopra lo slider
+                
+                // Overlay migliorato per iOS
                 const soundItem = slider.closest('.sound-item');
                 if (soundItem) {
                     const sliderContainer = slider.closest('.volume-slider');
@@ -377,23 +511,25 @@ document.addEventListener('DOMContentLoaded', function() {
                         const overlay = document.createElement('div');
                         overlay.className = 'ios-slider-overlay';
                         
-                        // Posiziona l'overlay sopra lo slider
+                        // Posiziona l'overlay
                         sliderContainer.style.position = 'relative';
                         
-                        // Evento di tocco sull'overlay
+                        // Eventi touch dell'overlay
                         overlay.addEventListener('touchstart', function(e) {
-                            // Rileva la posizione e imposta il valore dello slider
+                            // Sblocca audio se necessario
+                            if (!audioUnlocked) {
+                                unlockAudio();
+                            }
+                            
+                            // Calcola posizione
                             const rect = slider.getBoundingClientRect();
                             const touchX = e.touches[0].clientX - rect.left;
                             const percent = Math.max(0, Math.min(1, touchX / rect.width));
                             
-                            // Imposta il nuovo valore
+                            // Imposta valore
                             slider.value = Math.round(percent * 100);
-                            
-                            // Attiva il cambio di volume
                             handleVolumeChange(slider);
                             
-                            // Previeni lo scroll della pagina
                             e.preventDefault();
                         });
                         
@@ -408,7 +544,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             e.preventDefault();
                         });
                         
-                        // Aggiungi l'overlay al container
+                        // Aggiungi l'overlay
                         sliderContainer.appendChild(overlay);
                     }
                 }
@@ -430,55 +566,47 @@ document.addEventListener('DOMContentLoaded', function() {
         let timerInterval;
         let remainingTime = 0;
 
-        // Mostra/nascondi il modale del timer
+        // Mostra/nascondi modale timer
         timerBtn.addEventListener('click', function(event) {
-            // Previene che l'evento si propaghi al documento
             event.stopPropagation();
             timerModal.classList.toggle('hidden');
         });
 
-        // Aggiungiamo un listener ai pulsanti del timer per evitare la propagazione
+        // Previeni propagazione eventi dai pulsanti timer
         timerOptions.forEach(button => {
             button.addEventListener('click', function(event) {
                 event.stopPropagation();
             });
         });
 
-        // Chiudi il modale del timer quando si fa clic fuori
+        // Chiudi modale timer quando si fa click fuori
         document.addEventListener('click', function(event) {
-            // Verifichiamo che il modale sia visibile
             if (!timerModal.classList.contains('hidden')) {
-                // Verifichiamo che il click non sia sul modale o sul pulsante del timer
                 if (!timerModal.contains(event.target) && event.target !== timerBtn) {
                     timerModal.classList.add('hidden');
                 }
             }
         });
 
-        // Gestione delle opzioni del timer
+        // Gestione delle opzioni timer
         timerOptions.forEach(option => {
             option.addEventListener('click', function(event) {
-                // Previene la propagazione dell'evento
                 event.stopPropagation();
                 
                 const minutes = parseInt(this.dataset.time);
                 console.log(`Timer impostato per ${minutes} minuti`);
                 
-                // Resetta lo stato attivo su tutti i pulsanti
+                // Reset stato attivo
                 timerOptions.forEach(btn => btn.classList.remove('active'));
-                
-                // Imposta lo stato attivo sul pulsante cliccato
                 this.classList.add('active');
                 
-                // Cancella il timer esistente
+                // Cancella timer esistente
                 clearInterval(timerInterval);
                 
                 if (minutes === 0) {
-                    // Timer disattivato
                     remainingTime = 0;
                     timerStatus.textContent = "Nessun timer impostato";
                 } else {
-                    // Imposta il nuovo timer
                     remainingTime = minutes * 60;
                     updateTimerDisplay();
                     
@@ -487,7 +615,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         updateTimerDisplay();
                         
                         if (remainingTime <= 0) {
-                            // Ferma tutti i suoni quando il timer scade
                             stopAllSounds();
                             clearInterval(timerInterval);
                             timerStatus.textContent = "Timer scaduto";
@@ -496,14 +623,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     }, 1000);
                 }
                 
-                // Manteniamo il modale visibile per un breve momento per mostrare il feedback
                 setTimeout(function() {
                     timerModal.classList.add('hidden');
                 }, 300);
             });
         });
 
-        // Aggiorna il display del timer
+        // Aggiorna display timer
         function updateTimerDisplay() {
             const minutes = Math.floor(remainingTime / 60);
             const seconds = remainingTime % 60;
@@ -512,21 +638,43 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Ferma tutti i suoni
         function stopAllSounds() {
-            for (const sound in sounds) {
-                if (sounds[sound] && sounds[sound].element) {
-                    sounds[sound].element.pause();
-                    sounds[sound].element.currentTime = 0;
-                    sounds[sound].volume = 0;
+            if (isIOS) {
+                // Approccio Web Audio per iOS
+                for (const soundId in sounds) {
+                    if (sounds[soundId] && sounds[soundId].playing) {
+                        try {
+                            if (sounds[soundId].source) {
+                                sounds[soundId].source.stop();
+                            }
+                            sounds[soundId].playing = false;
+                            sounds[soundId].volume = 0;
+                            
+                            // Ricrea i nodi per uso futuro
+                            setupAudioNodesiOS(soundId);
+                        } catch (e) {
+                            console.warn(`Errore fermando ${soundId}:`, e);
+                        }
+                    }
+                }
+            } else {
+                // Approccio standard
+                for (const sound in sounds) {
+                    if (sounds[sound] && sounds[sound].element) {
+                        sounds[sound].element.pause();
+                        sounds[sound].element.currentTime = 0;
+                        sounds[sound].volume = 0;
+                        sounds[sound].playing = false;
+                    }
                 }
             }
             
-            // Resetta tutti gli slider a 0
+            // Reset sliders
             sliders.forEach(slider => {
                 slider.value = 0;
             });
         }
     }
 
-    // Debugging init message
-    console.log("Serenity app initialized");
+    // Messaggio di debug
+    console.log("Serenity app inizializzata");
 });
