@@ -422,3 +422,33 @@ footer {
         flex: 0 0 120px; /* Ridotto leggermente su schermi piccoli */
     }
 }
+
+/* Stile specifico per iOS slider */
+.ios-slider-overlay {
+    position: absolute;
+    top: -15px;
+    left: 0;
+    right: 0;
+    bottom: -15px;
+    z-index: 10;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+/* Migliora ulteriormente gli slider per iOS */
+@media (max-width: 480px) {
+    .slider::-webkit-slider-thumb, 
+    .slider::-moz-range-thumb {
+        width: 36px; /* Ancora più grande su iOS */
+        height: 36px; /* Ancora più grande su iOS */
+    }
+    
+    .slider {
+        height: 12px; /* Barra ancora più spessa su iOS */
+        margin: 15px 0; /* Più margine su iOS */
+    }
+    
+    .sound-item {
+        padding: 16px 0; /* Più spazio su iOS */
+    }
+}
