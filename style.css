@@ -659,3 +659,38 @@ html, body {
     overflow: auto;
     -webkit-overflow-scrolling: touch;
 }
+
+/* Stile per il pulsante Stop */
+.stop-container {
+    margin-left: 10px;
+}
+
+#stop-btn {
+    background: transparent;
+    border: none;
+    color: var(--dark-text);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 8px;
+    transition: all 0.2s ease;
+}
+
+#stop-btn:hover {
+    color: #ff3b30; /* Colore rosso per evidenziare l'azione di stop */
+}
+
+#stop-btn:active {
+    transform: scale(0.95);
+}
+
+/* Effetto pulsazione per il pulsante stop quando ci sono suoni attivi */
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+.playing {
+    color: var(--accent-color) !important;
+    animation: pulse 2s infinite;
+}

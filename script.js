@@ -675,6 +675,67 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
+        // Gestione del pulsante di stop
+        const stopBtn = document.getElementById('stop-btn');
+        let anyPlaying = false; // Flag per tracciare se c'è almeno un suono in riproduzione
+
+        // Aggiungi l'event listener al pulsante stop
+        stopBtn.addEventListener('click', function() {
+            stopAllSounds();
+            updateStopButtonState(false);
+        });
+
+        // Funzione per aggiornare lo stato del pulsante stop in base alla riproduzione
+        function updateStopButtonState(playing) {
+            if (playing) {
+                stopBtn.classList.add('playing');
+                anyPlaying = true;
+            } else {
+                stopBtn.classList.remove('playing');
+                anyPlaying = false;
+            }
+        }
+
+        // Funzione comune per gestire i cambiamenti di volume
+        function handleVolumeChange(slider) {
+            const soundId = slider.dataset.sound;
+            const volume = slider.value / 100;
+            
+            if (isIOS) {
+                playIOSSoundWithWebAudio(soundId, volume);
+            } else {
+                playStandardSound(soundId, volume);
+            }
+            
+            // Controlla se almeno un suono è attivo
+            checkActiveSounds();
+        }
+
+        // Funzione per verificare se ci sono suoni attivi
+        function checkActiveSounds() {
+            let hasActiveSounds = false;
+            
+            // Verifica tutti gli slider
+            sliders.forEach(slider => {
+                if (parseInt(slider.value) > 0) {
+                    hasActiveSounds = true;
+                }
+            });
+            
+            // Aggiorna lo stato del pulsante stop
+            updateStopButtonState(hasActiveSounds);
+        }
+
+        // Aggiorna la funzione stopAllSounds per chiamare anche updateStopButtonState
+        const originalStopAllSounds = stopAllSounds;
+        stopAllSounds = function() {
+            originalStopAllSounds();
+            updateStopButtonState(false);
+        };
+
+        // Esegui un controllo iniziale dei suoni attivi
+        setTimeout(checkActiveSounds, 1000);
+
         // Gestione del blocco schermo
         const lockBtn = document.getElementById('lock-btn');
         const screenLockOverlay = document.querySelector('.screen-lock-overlay');
