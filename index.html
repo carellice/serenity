@@ -13,18 +13,23 @@
     <div class="container">
         <header>
             <h1>Serenity</h1>
-            <div class="timer-container">
-                <button id="timer-btn"><i class="fas fa-clock"></i></button>
-                <div id="timer-modal" class="hidden">
-                    <h3>Sleep Timer</h3>
-                    <div class="timer-options">
-                        <button data-time="5">5 min</button>
-                        <button data-time="15">15 min</button>
-                        <button data-time="30">30 min</button>
-                        <button data-time="60">1 hour</button>
-                        <button data-time="0">Off</button>
+            <div class="controls-container">
+                <div class="timer-container">
+                    <button id="timer-btn"><i class="fas fa-clock"></i></button>
+                    <div id="timer-modal" class="hidden">
+                        <h3>Sleep Timer</h3>
+                        <div class="timer-options">
+                            <button data-time="5">5 min</button>
+                            <button data-time="15">15 min</button>
+                            <button data-time="30">30 min</button>
+                            <button data-time="60">1 hour</button>
+                            <button data-time="0">Off</button>
+                        </div>
+                        <p id="timer-status">No timer set</p>
                     </div>
-                    <p id="timer-status">No timer set</p>
+                </div>
+                <div class="lock-container">
+                    <button id="lock-btn"><i class="fas fa-lock-open"></i></button>
                 </div>
             </div>
         </header>
@@ -166,6 +171,24 @@
     <footer>
         <p>© 2025 Serenity - Relaxing Sounds</p>
     </footer>
+
+    <!-- Overlay per il blocco schermo -->
+    <div class="screen-lock-overlay">
+        <div class="lock-message">
+            <i class="fas fa-lock"></i>
+            <p>Schermo bloccato</p>
+            <button class="unlock-btn">Sblocca</button>
+        </div>
+    </div>
+
+    <!-- Elemento anti burn-in per schermi OLED -->
+    <div class="screen-lock-overlay">
+        <div class="lock-message">
+            <i class="fas fa-lock"></i>
+            <p>Schermo bloccato</p>
+            <button class="unlock-btn">Sblocca</button>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>

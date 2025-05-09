@@ -58,7 +58,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Aggiungi un pulsante per sbloccare l'audio
             const unlockButton = document.createElement('button');
             unlockButton.className = 'unlock-audio-button';
-            unlockButton.textContent = isIOS ? 'Tocca qui per iniziare (iOS)' : 'Inizia a Rilassarti';
+            // unlockButton.textContent = isIOS ? 'Tocca qui per iniziare (iOS)' : 'Inizia a Rilassarti';
+            unlockButton.textContent = isIOS ? 'Inizia a Rilassarti' : 'Inizia a Rilassarti';
             unlockButton.addEventListener('click', function() {
                 unlockAudio();
                 loadingElement.style.opacity = '0';
@@ -673,6 +674,128 @@ document.addEventListener('DOMContentLoaded', function() {
                 slider.value = 0;
             });
         }
+
+        // Gestione del blocco schermo
+        const lockBtn = document.getElementById('lock-btn');
+        const screenLockOverlay = document.querySelector('.screen-lock-overlay');
+        const lockMessage = document.querySelector('.lock-message');
+        const unlockBtn = document.querySelector('.unlock-btn');
+        let screenLocked = false;
+        let moveMessageInterval;
+
+        // Funzione per bloccare lo schermo
+        function lockScreen() {
+            screenLocked = true;
+            lockBtn.innerHTML = '<i class="fas fa-lock"></i>';
+            lockBtn.classList.add('locked');
+            screenLockOverlay.classList.add('active');
+            
+            // Disabilita tutti gli slider
+            sliders.forEach(slider => {
+                slider.disabled = true;
+            });
+            
+            // Disabilita anche il pulsante timer
+            if (timerBtn) timerBtn.disabled = true;
+            
+            // Inizia a muovere il pulsante di sblocco per evitare burn-in
+            moveUnlockButton();
+        }
+
+        // Funzione per sbloccare lo schermo
+        function unlockScreen() {
+            screenLocked = false;
+            lockBtn.innerHTML = '<i class="fas fa-lock-open"></i>';
+            lockBtn.classList.remove('locked');
+            screenLockOverlay.classList.remove('active');
+            
+            // Abilita tutti gli slider
+            sliders.forEach(slider => {
+                slider.disabled = false;
+            });
+            
+            // Riabilita il pulsante timer
+            if (timerBtn) timerBtn.disabled = false;
+            
+            // Ferma il movimento del pulsante
+            clearInterval(moveMessageInterval);
+        }
+
+        // Funzione per muovere il pulsante di sblocco periodicamente
+        function moveUnlockButton() {
+            // Posizione iniziale casuale
+            setRandomPosition();
+            
+            // Imposta un intervallo per muovere il pulsante ogni 8 secondi
+            moveMessageInterval = setInterval(() => {
+                setRandomPosition();
+            }, 3000);
+        }
+
+        // Imposta una posizione casuale per il messaggio di sblocco
+        function setRandomPosition() {
+            // Ottieni le dimensioni della finestra
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            
+            // Ottieni le dimensioni del messaggio
+            const messageRect = lockMessage.getBoundingClientRect();
+            const messageWidth = messageRect.width;
+            const messageHeight = messageRect.height;
+            
+            // Calcola limiti per posizionamento sicuro (non troppo vicino ai bordi)
+            const maxX = windowWidth - messageWidth - 40;
+            const maxY = windowHeight - messageHeight - 40;
+            
+            // Genera coordinate casuali entro i limiti sicuri
+            const randomX = 20 + Math.floor(Math.random() * maxX);
+            const randomY = 20 + Math.floor(Math.random() * maxY);
+            
+            // Applica la nuova posizione con una transizione fluida
+            lockMessage.style.left = `${randomX}px`;
+            lockMessage.style.top = `${randomY}px`;
+        }
+
+        // Gestione del pulsante di blocco
+        lockBtn.addEventListener('click', function(event) {
+            event.stopPropagation();
+            if (screenLocked) {
+                unlockScreen();
+            } else {
+                lockScreen();
+            }
+        });
+
+        // Sblocco tramite il pulsante nell'overlay
+        unlockBtn.addEventListener('click', function() {
+            unlockScreen();
+        });
+
+        // Impedisci che lo schermo si spenga automaticamente
+        let wakeLock = null;
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    wakeLock.addEventListener('release', () => {
+                        console.log('Wake Lock rilasciato');
+                    });
+                    console.log('Wake Lock attivato');
+                }
+            } catch (err) {
+                console.error(`Errore durante l'attivazione del Wake Lock: ${err.message}`);
+            }
+        }
+
+        // Attiva il Wake Lock quando l'app è in uso
+        document.addEventListener('visibilitychange', async () => {
+            if (document.visibilityState === 'visible') {
+                await requestWakeLock();
+            }
+        });
+
+        // Attiva Wake Lock all'avvio dell'app
+        requestWakeLock();
     }
 
     // Messaggio di debug

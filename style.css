@@ -452,3 +452,210 @@ footer {
         padding: 16px 0; /* Più spazio su iOS */
     }
 }
+
+/* Stili per il lucchetto e il blocco schermo */
+.lock-container {
+    position: relative;
+    margin-left: 10px;
+}
+
+#lock-btn {
+    background: transparent;
+    border: none;
+    color: var(--dark-text);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 8px;
+    transition: all 0.2s ease;
+}
+
+#lock-btn.locked {
+    color: var(--accent-color);
+}
+
+/* Overlay di blocco quando lo schermo è bloccato */
+.screen-lock-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+.screen-lock-overlay.active {
+    display: flex;
+}
+
+.lock-message {
+    color: white;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 20px 30px;
+    border-radius: 12px;
+    font-size: 18px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+
+.lock-message i {
+    font-size: 32px;
+    margin-bottom: 10px;
+    color: var(--accent-color);
+}
+
+/* Stili per prevenire burn-in su OLED */
+.anti-burnin {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999;
+    pointer-events: none; /* Permette di cliccare attraverso */
+    opacity: 0.02; /* Quasi invisibile */
+    mix-blend-mode: difference; /* Invertirà i colori sottostanti */
+}
+
+@keyframes moveGradient {
+    0% {
+        background-position: 0% 0%;
+    }
+    25% {
+        background-position: 100% 0%;
+    }
+    50% {
+        background-position: 100% 100%;
+    }
+    75% {
+        background-position: 0% 100%;
+    }
+    100% {
+        background-position: 0% 0%;
+    }
+}
+
+.anti-burnin-gradient {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, #000000, #333333, #666666, #999999);
+    background-size: 400% 400%;
+    animation: moveGradient 60s ease infinite;
+}
+
+/* Evita il movimento degli elementi durante lo scroll su iOS */
+html, body {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Pulsante di sblocco visibile nell'overlay */
+.unlock-btn {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    margin-top: 15px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.unlock-btn:hover {
+    background-color: #0070e0;
+}
+
+/* Stili per il lucchetto e il blocco schermo */
+.controls-container {
+    display: flex;
+    align-items: center;
+}
+
+.lock-container {
+    margin-left: 10px;
+}
+
+#lock-btn {
+    background: transparent;
+    border: none;
+    color: var(--dark-text);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 8px;
+    transition: all 0.2s ease;
+}
+
+#lock-btn.locked {
+    color: var(--accent-color);
+}
+
+/* Overlay di blocco con sfondo completamente nero */
+.screen-lock-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000000; /* Completamente nero per evitare burn-in */
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.screen-lock-overlay.active {
+    display: flex;
+}
+
+.lock-message {
+    color: white;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 20px 30px;
+    border-radius: 12px;
+    font-size: 18px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    position: absolute; /* Per consentire il movimento */
+    transition: all 0.5s ease; /* Transizione fluida durante il movimento */
+}
+
+.lock-message i {
+    font-size: 32px;
+    margin-bottom: 10px;
+    color: var(--accent-color);
+}
+
+/* Pulsante di sblocco visibile nell'overlay */
+.unlock-btn {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    margin-top: 15px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.unlock-btn:hover {
+    background-color: #0070e0;
+}
+
+/* Evita il movimento degli elementi durante lo scroll su iOS */
+html, body {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
