@@ -8,6 +8,28 @@
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="icon.png" type="image/x-icon">
     <link rel="shortcut icon" href="icon.png" type="image/x-icon">
+
+    <!-- Metadati per PWA -->
+    <meta name="theme-color" content="#121212">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Serenity">
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Icone per iOS -->
+    <link rel="apple-touch-icon" href="icons/apple-icon-120x120.png" sizes="120x120">
+    <link rel="apple-touch-icon" href="icons/apple-icon-152x152.png" sizes="152x152">
+    <link rel="apple-touch-icon" href="icons/apple-icon-167x167.png" sizes="167x167">
+    <link rel="apple-touch-icon" href="icons/apple-icon-180x180.png" sizes="180x180">
+
+    <!-- Splash screen per iOS -->
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-2048-2732.png" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-1668-2388.png" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-1536-2048.png" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-1125-2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-1242-2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-828-1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-640-1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
 </head>
 <body class="dark-theme">
     <div class="container">
@@ -191,6 +213,20 @@
             <p>Schermo bloccato</p>
             <button class="unlock-btn">Sblocca</button>
         </div>
+    </div>
+
+    <!-- Pulsante di installazione -->
+    <div class="install-container" id="install-container">
+        <button class="install-btn" id="install-btn">
+            <i class="fas fa-download"></i>
+            Installa App
+        </button>
+    </div>
+
+    <!-- Banner di installazione completata -->
+    <div class="install-success" id="install-success">
+        <i class="fas fa-check-circle"></i>
+        <span>App installata con successo!</span>
     </div>
 
     <script src="script.js"></script>

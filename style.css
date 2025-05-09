@@ -694,3 +694,114 @@ html, body {
     color: var(--accent-color) !important;
     animation: pulse 2s infinite;
 }
+
+/* Aggiungi questo al tuo file CSS */
+/* Previene comportamenti strani su iOS quando installata come PWA */
+@media (display-mode: standalone) {
+  /* Previene lo zoom della pagina */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+  
+  /* Previene il rimbalzo della pagina */
+  html {
+    overscroll-behavior-y: none;
+  }
+  
+  /* Nasconde la barra degli indirizzi su alcuni browser */
+  body {
+    height: 100vh;
+    overflow: hidden;
+  }
+  
+  /* Contenitore principale con scrolling */
+  .container {
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Stile per il pulsante di installazione */
+.install-container {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    display: none; /* Inizialmente nascosto */
+}
+
+.install-btn {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 24px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(10, 132, 255, 0.3);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    animation: pulse-subtle 2s infinite;
+}
+
+.install-btn:hover {
+    background-color: #0070e0;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(10, 132, 255, 0.4);
+}
+
+.install-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(10, 132, 255, 0.3);
+}
+
+.install-btn i {
+    font-size: 18px;
+}
+
+/* Animazione sottile per attirare l'attenzione */
+@keyframes pulse-subtle {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Banner di installazione completata */
+.install-success {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(40, 167, 69, 0.9);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.install-success.show {
+    opacity: 1;
+}
+
+.install-success i {
+    font-size: 18px;
+}
+
+/* Stile per il pulsante di installazione in dispositivi già installati */
+@media (display-mode: standalone) {
+    .install-container {
+        display: none !important;
+    }
+}

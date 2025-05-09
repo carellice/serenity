@@ -862,3 +862,221 @@ document.addEventListener('DOMContentLoaded', function() {
     // Messaggio di debug
     console.log("Serenity app inizializzata");
 });
+
+// Registrazione del Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then((registration) => {
+        console.log('Service Worker registrato con successo:', registration.scope);
+      })
+      .catch((error) => {
+        console.log('Registrazione Service Worker fallita:', error);
+      });
+  });
+}
+
+// Gestione dell'installazione PWA
+let deferredPrompt;
+const installContainer = document.getElementById('install-container');
+const installBtn = document.getElementById('install-btn');
+const installSuccess = document.getElementById('install-success');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Previene la visualizzazione del prompt predefinito
+    e.preventDefault();
+    
+    // Salva l'evento per mostrarlo in seguito
+    deferredPrompt = e;
+    
+    // Mostra il pulsante di installazione
+    installContainer.style.display = 'block';
+    
+    console.log('L\'app può essere installata');
+});
+
+// Evento click sul pulsante di installazione
+installBtn.addEventListener('click', () => {
+    // Verifica se l'evento deferredPrompt è disponibile
+    if (!deferredPrompt) {
+        console.log('Evento di installazione non disponibile');
+        return;
+    }
+    
+    // Mostra il prompt di installazione
+    deferredPrompt.prompt();
+    
+    // Nascondi il pulsante di installazione durante il prompt
+    installContainer.style.display = 'none';
+    
+    // Attende la scelta dell'utente
+    deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+            console.log('Utente ha accettato l\'installazione');
+            showInstallSuccess();
+        } else {
+            console.log('Utente ha rifiutato l\'installazione');
+            // Mostra di nuovo il pulsante se l'utente rifiuta
+            setTimeout(() => {
+                installContainer.style.display = 'block';
+            }, 3000);
+        }
+        
+        // Reset della variabile prompt
+        deferredPrompt = null;
+    });
+});
+
+// Mostra il messaggio di installazione completata
+function showInstallSuccess() {
+    installSuccess.classList.add('show');
+    
+    // Nascondi il messaggio dopo 3 secondi
+    setTimeout(() => {
+        installSuccess.classList.remove('show');
+    }, 3000);
+}
+
+// Controlla se l'app è già installata
+window.addEventListener('appinstalled', (evt) => {
+    console.log('App installata con successo!');
+    installContainer.style.display = 'none';
+    showInstallSuccess();
+});
+
+// Verifica se l'app è già in modalità standalone (già installata)
+if (window.matchMedia('(display-mode: standalone)').matches || 
+    window.navigator.standalone === true) {
+    console.log('App già installata e in esecuzione in modalità standalone');
+    installContainer.style.display = 'none';
+}
+
+// Aggiungi una funzione per mostrare il pulsante di installazione manualmente
+function showInstallPrompt() {
+    if (deferredPrompt) {
+        installContainer.style.display = 'block';
+    }
+}
+
+// Funzione per controllare periodicamente se l'app può essere installata
+function checkInstallability() {
+    // Su iOS, navigator.standalone è true se l'app è installata
+    const isIOSInstalled = window.navigator.standalone === true;
+    
+    // Su altri browser, matchMedia controlla la modalità display
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+    
+    // Se già installata, nascondi il pulsante
+    if (isIOSInstalled || isStandalone) {
+        installContainer.style.display = 'none';
+    } 
+    // Altrimenti, se l'evento di installazione è disponibile, mostra il pulsante
+    else if (deferredPrompt) {
+        installContainer.style.display = 'block';
+    }
+}
+
+// Controlla ogni 5 secondi se l'app può essere installata
+setInterval(checkInstallability, 5000);
+
+// Gestione media query per rilevare cambiamenti nella modalità di visualizzazione
+window.matchMedia('(display-mode: standalone)').addEventListener('change', (e) => {
+    if (e.matches) {
+        console.log('App ora in modalità standalone');
+        installContainer.style.display = 'none';
+    }
+});
+
+// Verifica lo stato della connessione all'avvio
+document.addEventListener('DOMContentLoaded', function() {
+  checkConnectionAndCacheStatus();
+});
+
+// Verifica se l'app è online e se tutti i suoni sono in cache
+function checkConnectionAndCacheStatus() {
+  const isOnline = navigator.onLine;
+  console.log('Stato connessione:', isOnline ? 'Online' : 'Offline');
+  
+  if (!isOnline) {
+    // Se siamo offline, verifichiamo che tutti i file audio siano in cache
+    Promise.all(
+      soundFiles.map(file => {
+        return caches.match(`sounds/${file}`)
+          .then(response => {
+            if (!response) {
+              console.warn(`Il file audio ${file} non è disponibile offline`);
+              return false;
+            }
+            return true;
+          });
+      })
+    ).then(results => {
+      const allCached = results.every(result => result === true);
+      if (!allCached) {
+        // Mostra un avviso che alcuni suoni potrebbero non essere disponibili
+        showOfflineWarning();
+      }
+    });
+  }
+}
+
+// Mostra un avviso per l'utente quando è offline e mancano file audio
+function showOfflineWarning() {
+  const warningElement = document.createElement('div');
+  warningElement.className = 'offline-warning';
+  warningElement.innerHTML = `
+    <div class="offline-warning-content">
+      <i class="fas fa-wifi"></i>
+      <p>Sei offline. Alcuni suoni potrebbero non essere disponibili.</p>
+      <button class="offline-dismiss">OK</button>
+    </div>
+  `;
+  
+  document.body.appendChild(warningElement);
+  
+  // Pulsante per chiudere l'avviso
+  warningElement.querySelector('.offline-dismiss').addEventListener('click', function() {
+    warningElement.remove();
+  });
+}
+
+// Aggiungi stile CSS per l'avviso offline
+const offlineStyle = document.createElement('style');
+offlineStyle.textContent = `
+.offline-warning {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(255, 171, 0, 0.9);
+  color: #000;
+  padding: 10px;
+  text-align: center;
+  z-index: 9999;
+  font-size: 14px;
+}
+
+.offline-warning-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.offline-warning i {
+  font-size: 18px;
+}
+
+.offline-dismiss {
+  background: transparent;
+  border: 1px solid #000;
+  border-radius: 4px;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+`;
+document.head.appendChild(offlineStyle);
+
+// Ascolta i cambiamenti di connettività
+window.addEventListener('online', checkConnectionAndCacheStatus);
+window.addEventListener('offline', checkConnectionAndCacheStatus);
