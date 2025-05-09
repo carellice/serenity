@@ -382,11 +382,11 @@ document.addEventListener('DOMContentLoaded', function() {
         Promise.all(loadPromises)
             .then(() => {
                 console.log('Tutti i buffer audio caricati per iOS');
-                initializeVolumeControls();
+                initializeSliders();
             })
             .catch(error => {
                 console.error('Errore caricamento buffer:', error);
-                initializeVolumeControls();
+                initializeSliders();
             });
     } else {
         // Approccio standard per altri browser
@@ -422,188 +422,143 @@ document.addEventListener('DOMContentLoaded', function() {
         }))
         .then(() => {
             console.log('Tutti i suoni precaricati con successo');
-            initializeVolumeControls();
+            initializeSliders();
         })
         .catch(error => {
             console.error('Errore nel precaricamento:', error);
-            initializeVolumeControls();
+            initializeSliders();
         });
     }
 
-    function initializeVolumeControls() {
-        // Oggetto per memorizzare i valori del volume per ogni suono
-        const volumeValues = {};
+    // Inizializza gli slider
+    function initializeSliders() {
+        const sliders = document.querySelectorAll('.slider');
         
-        // Inizializza i volumi a 0
-        soundFiles.forEach(soundId => {
-            volumeValues[soundId] = 0;
-        });
-        
-        // Funzione per aggiornare il volume dell'audio
-        function updateVolume(soundId, value) {
-            // Limita il valore tra 0 e 100
-            value = Math.max(0, Math.min(100, value));
+        // Funzione comune per gestire i cambiamenti di volume
+        function handleVolumeChange(slider) {
+            const soundId = slider.dataset.sound;
+            const volume = slider.value / 100;
             
-            // Memorizza il valore
-            volumeValues[soundId] = value;
-            
-            // Aggiorna l'interfaccia
-            updateVolumeUI(soundId, value);
-            
-            // Applica il volume all'audio
-            const volume = value / 100;
             if (isIOS) {
                 playIOSSoundWithWebAudio(soundId, volume);
             } else {
                 playStandardSound(soundId, volume);
             }
-            
-            // Controlla se ci sono suoni attivi per aggiornare lo stato del pulsante stop
-            checkActiveSounds();
         }
         
-        // Aggiorna l'interfaccia utente per un suono specifico
-        function updateVolumeUI(soundId, value) {
-            // Aggiorna il testo del valore
-            const valueElement = document.querySelector(`.volume-value[data-sound="${soundId}"]`);
-            if (valueElement) {
-                valueElement.textContent = `${value}%`;
-            }
-            
-            // Aggiorna la barra di riempimento
-            const fillElement = document.querySelector(`.volume-fill[data-sound="${soundId}"]`);
-            if (fillElement) {
-                fillElement.style.width = `${value}%`;
-            }
-            
-            // Aggiorna l'aspetto dei pulsanti in base al valore
-            const decreaseButton = document.querySelector(`.volume-btn.decrease[data-sound="${soundId}"]`);
-            if (decreaseButton) {
-                decreaseButton.disabled = value <= 0;
-                decreaseButton.style.opacity = value <= 0 ? '0.5' : '1';
-            }
-            
-            const increaseButton = document.querySelector(`.volume-btn.increase[data-sound="${soundId}"]`);
-            if (increaseButton) {
-                increaseButton.disabled = value >= 100;
-                increaseButton.style.opacity = value >= 100 ? '0.5' : '1';
-            }
-        }
-        
-        // Gestisci i click sui pulsanti
-        document.addEventListener('click', function(e) {
-            // Trova il pulsante del volume più vicino (se esistente)
-            const button = e.target.closest('.volume-btn');
-            if (!button) return;
-            
-            // Ottieni i dati del pulsante
-            const soundId = button.dataset.sound;
-            const action = button.dataset.action;
-            
-            // Gestisci le diverse azioni
-            if (action === 'increase') {
-                // Incrementa il volume di 5
-                updateVolume(soundId, volumeValues[soundId] + 5);
-            } else if (action === 'decrease') {
-                // Decrementa il volume di 5
-                updateVolume(soundId, volumeValues[soundId] - 5);
-            } else if (action === 'mute') {
-                // Imposta il volume a 0
-                updateVolume(soundId, 0);
-            }
-        });
-        
-        // Inizializza l'UI per tutti i suoni
-        soundFiles.forEach(soundId => {
-            updateVolumeUI(soundId, 0);
-        });
-        
-        // Funzione per fermare tutti i suoni
-        function stopAllSounds() {
+        // Aggiungi event listener a tutti gli slider
+        sliders.forEach(slider => {
+            // Per iOS, aggiungi un evento di click diretto che farà sbloccare l'audio
             if (isIOS) {
-                // Approccio Web Audio per iOS
-                for (const soundId in sounds) {
-                    if (sounds[soundId] && sounds[soundId].playing) {
-                        try {
-                            if (sounds[soundId].source) {
-                                sounds[soundId].source.stop();
-                            }
-                            sounds[soundId].playing = false;
-                            sounds[soundId].volume = 0;
-                            
-                            // Ricrea i nodi per uso futuro
-                            setupAudioNodesiOS(soundId);
-                            
-                            // Aggiorna l'UI
-                            updateVolumeUI(soundId, 0);
-                            volumeValues[soundId] = 0;
-                        } catch (e) {
-                            console.warn(`Errore fermando ${soundId}:`, e);
-                        }
+                slider.addEventListener('click', function(e) {
+                    // Sblocca l'audio al primo click
+                    if (!audioUnlocked) {
+                        unlockAudio();
                     }
+                    
+                    // Calcola la posizione relativa del click
+                    const rect = this.getBoundingClientRect();
+                    const clickPosition = e.clientX - rect.left;
+                    const newValue = Math.round((clickPosition / rect.width) * 100);
+                    
+                    // Limita il valore tra 0 e 100
+                    this.value = Math.max(0, Math.min(100, newValue));
+                    handleVolumeChange(this);
+                });
+            }
+            
+            // Evento principale per i cambiamenti di input
+            slider.addEventListener('input', function() {
+                handleVolumeChange(this);
+            });
+            
+            // Altri eventi standard
+            slider.addEventListener('change', function() {
+                handleVolumeChange(this);
+            });
+            
+            slider.addEventListener('touchend', function() {
+                handleVolumeChange(this);
+            });
+            
+            // Sblocco audio al primo touch
+            slider.addEventListener('touchstart', function() {
+                if (!audioUnlocked) {
+                    unlockAudio();
                 }
-            } else {
-                // Approccio standard
-                for (const sound in sounds) {
-                    if (sounds[sound] && sounds[sound].element) {
-                        sounds[sound].element.pause();
-                        sounds[sound].element.currentTime = 0;
-                        sounds[sound].volume = 0;
-                        sounds[sound].playing = false;
+            });
+            
+            // Per iOS, touch events specifici
+            if (isIOS) {
+                slider.addEventListener('touchmove', function(e) {
+                    // Calcola la posizione relativa del touch
+                    const rect = this.getBoundingClientRect();
+                    const touchPosition = e.touches[0].clientX - rect.left;
+                    const newValue = Math.round((touchPosition / rect.width) * 100);
+                    
+                    // Limita il valore tra 0 e 100
+                    this.value = Math.max(0, Math.min(100, newValue));
+                    handleVolumeChange(this);
+                    
+                    // Previeni lo scroll
+                    e.preventDefault();
+                });
+                
+                // Overlay migliorato per iOS
+                const soundItem = slider.closest('.sound-item');
+                if (soundItem) {
+                    const sliderContainer = slider.closest('.volume-slider');
+                    if (sliderContainer) {
+                        const overlay = document.createElement('div');
+                        overlay.className = 'ios-slider-overlay';
                         
-                        // Aggiorna l'UI
-                        const soundId = sound;
-                        updateVolumeUI(soundId, 0);
-                        volumeValues[soundId] = 0;
+                        // Posiziona l'overlay
+                        sliderContainer.style.position = 'relative';
+                        
+                        // Eventi touch dell'overlay
+                        overlay.addEventListener('touchstart', function(e) {
+                            // Sblocca audio se necessario
+                            if (!audioUnlocked) {
+                                unlockAudio();
+                            }
+                            
+                            // Calcola posizione
+                            const rect = slider.getBoundingClientRect();
+                            const touchX = e.touches[0].clientX - rect.left;
+                            const percent = Math.max(0, Math.min(1, touchX / rect.width));
+                            
+                            // Imposta valore
+                            slider.value = Math.round(percent * 100);
+                            handleVolumeChange(slider);
+                            
+                            e.preventDefault();
+                        });
+                        
+                        overlay.addEventListener('touchmove', function(e) {
+                            const rect = slider.getBoundingClientRect();
+                            const touchX = e.touches[0].clientX - rect.left;
+                            const percent = Math.max(0, Math.min(1, touchX / rect.width));
+                            
+                            slider.value = Math.round(percent * 100);
+                            handleVolumeChange(slider);
+                            
+                            e.preventDefault();
+                        });
+                        
+                        // Aggiungi l'overlay
+                        sliderContainer.appendChild(overlay);
                     }
                 }
             }
-            
-            // Aggiorna lo stato del pulsante stop
-            updateStopButtonState(false);
-        }
-        
-        // Funzione per verificare se ci sono suoni attivi
-        function checkActiveSounds() {
-            let hasActiveSounds = false;
-            
-            // Verifica tutti i valori del volume
-            for (const soundId in volumeValues) {
-                if (volumeValues[soundId] > 0) {
-                    hasActiveSounds = true;
-                    break;
-                }
-            }
-            
-            // Aggiorna lo stato del pulsante stop
-            updateStopButtonState(hasActiveSounds);
-        }
-        
-        // Funzione per aggiornare lo stato del pulsante stop
-        function updateStopButtonState(playing) {
-            const stopBtn = document.getElementById('stop-btn');
-            if (stopBtn) {
-                if (playing) {
-                    stopBtn.classList.add('playing');
-                } else {
-                    stopBtn.classList.remove('playing');
-                }
-            }
-        }
-        
-        // Gestione del pulsante di stop
-        const stopBtn = document.getElementById('stop-btn');
-        if (stopBtn) {
-            stopBtn.addEventListener('click', stopAllSounds);
-        }
-        
+        });
+
         // Sblocco globale al primo tocco
         document.addEventListener('touchstart', function() {
             if (!audioUnlocked) {
                 unlockAudio();
             }
         }, {once: true});
-        
+
         // Gestione migliorata del timer
         const timerBtn = document.getElementById('timer-btn');
         const timerModal = document.getElementById('timer-modal');
@@ -611,31 +566,29 @@ document.addEventListener('DOMContentLoaded', function() {
         const timerStatus = document.getElementById('timer-status');
         let timerInterval;
         let remainingTime = 0;
-        
+
         // Mostra/nascondi modale timer
-        if (timerBtn) {
-            timerBtn.addEventListener('click', function(event) {
-                event.stopPropagation();
-                timerModal.classList.toggle('hidden');
-            });
-        }
-        
+        timerBtn.addEventListener('click', function(event) {
+            event.stopPropagation();
+            timerModal.classList.toggle('hidden');
+        });
+
         // Previeni propagazione eventi dai pulsanti timer
         timerOptions.forEach(button => {
             button.addEventListener('click', function(event) {
                 event.stopPropagation();
             });
         });
-        
+
         // Chiudi modale timer quando si fa click fuori
         document.addEventListener('click', function(event) {
-            if (timerModal && !timerModal.classList.contains('hidden')) {
+            if (!timerModal.classList.contains('hidden')) {
                 if (!timerModal.contains(event.target) && event.target !== timerBtn) {
                     timerModal.classList.add('hidden');
                 }
             }
         });
-        
+
         // Gestione delle opzioni timer
         timerOptions.forEach(option => {
             option.addEventListener('click', function(event) {
@@ -676,14 +629,113 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 300);
             });
         });
-        
+
         // Aggiorna display timer
         function updateTimerDisplay() {
             const minutes = Math.floor(remainingTime / 60);
             const seconds = remainingTime % 60;
             timerStatus.textContent = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
         }
-        
+
+        // Ferma tutti i suoni
+        function stopAllSounds() {
+            if (isIOS) {
+                // Approccio Web Audio per iOS
+                for (const soundId in sounds) {
+                    if (sounds[soundId] && sounds[soundId].playing) {
+                        try {
+                            if (sounds[soundId].source) {
+                                sounds[soundId].source.stop();
+                            }
+                            sounds[soundId].playing = false;
+                            sounds[soundId].volume = 0;
+                            
+                            // Ricrea i nodi per uso futuro
+                            setupAudioNodesiOS(soundId);
+                        } catch (e) {
+                            console.warn(`Errore fermando ${soundId}:`, e);
+                        }
+                    }
+                }
+            } else {
+                // Approccio standard
+                for (const sound in sounds) {
+                    if (sounds[sound] && sounds[sound].element) {
+                        sounds[sound].element.pause();
+                        sounds[sound].element.currentTime = 0;
+                        sounds[sound].volume = 0;
+                        sounds[sound].playing = false;
+                    }
+                }
+            }
+            
+            // Reset sliders
+            sliders.forEach(slider => {
+                slider.value = 0;
+            });
+        }
+
+        // Gestione del pulsante di stop
+        const stopBtn = document.getElementById('stop-btn');
+        let anyPlaying = false; // Flag per tracciare se c'è almeno un suono in riproduzione
+
+        // Aggiungi l'event listener al pulsante stop
+        stopBtn.addEventListener('click', function() {
+            stopAllSounds();
+            updateStopButtonState(false);
+        });
+
+        // Funzione per aggiornare lo stato del pulsante stop in base alla riproduzione
+        function updateStopButtonState(playing) {
+            if (playing) {
+                stopBtn.classList.add('playing');
+                anyPlaying = true;
+            } else {
+                stopBtn.classList.remove('playing');
+                anyPlaying = false;
+            }
+        }
+
+        // Funzione comune per gestire i cambiamenti di volume
+        function handleVolumeChange(slider) {
+            const soundId = slider.dataset.sound;
+            const volume = slider.value / 100;
+            
+            if (isIOS) {
+                playIOSSoundWithWebAudio(soundId, volume);
+            } else {
+                playStandardSound(soundId, volume);
+            }
+            
+            // Controlla se almeno un suono è attivo
+            checkActiveSounds();
+        }
+
+        // Funzione per verificare se ci sono suoni attivi
+        function checkActiveSounds() {
+            let hasActiveSounds = false;
+            
+            // Verifica tutti gli slider
+            sliders.forEach(slider => {
+                if (parseInt(slider.value) > 0) {
+                    hasActiveSounds = true;
+                }
+            });
+            
+            // Aggiorna lo stato del pulsante stop
+            updateStopButtonState(hasActiveSounds);
+        }
+
+        // Aggiorna la funzione stopAllSounds per chiamare anche updateStopButtonState
+        const originalStopAllSounds = stopAllSounds;
+        stopAllSounds = function() {
+            originalStopAllSounds();
+            updateStopButtonState(false);
+        };
+
+        // Esegui un controllo iniziale dei suoni attivi
+        setTimeout(checkActiveSounds, 1000);
+
         // Gestione del blocco schermo
         const lockBtn = document.getElementById('lock-btn');
         const screenLockOverlay = document.querySelector('.screen-lock-overlay');
@@ -699,16 +751,13 @@ document.addEventListener('DOMContentLoaded', function() {
             lockBtn.classList.add('locked');
             screenLockOverlay.classList.add('active');
             
-            // Disabilita tutti i pulsanti del volume
-            const volumeButtons = document.querySelectorAll('.volume-btn');
-            volumeButtons.forEach(button => {
-                button.disabled = true;
-                button.style.pointerEvents = 'none';
+            // Disabilita tutti gli slider
+            sliders.forEach(slider => {
+                slider.disabled = true;
             });
             
-            // Disabilita anche il pulsante timer e stop
+            // Disabilita anche il pulsante timer
             if (timerBtn) timerBtn.disabled = true;
-            if (stopBtn) stopBtn.disabled = true;
             
             // Inizia a muovere il pulsante di sblocco per evitare burn-in
             moveUnlockButton();
@@ -721,16 +770,13 @@ document.addEventListener('DOMContentLoaded', function() {
             lockBtn.classList.remove('locked');
             screenLockOverlay.classList.remove('active');
             
-            // Abilita tutti i pulsanti del volume
-            const volumeButtons = document.querySelectorAll('.volume-btn');
-            volumeButtons.forEach(button => {
-                button.disabled = false;
-                button.style.pointerEvents = 'auto';
+            // Abilita tutti gli slider
+            sliders.forEach(slider => {
+                slider.disabled = false;
             });
             
-            // Riabilita il pulsante timer e stop
+            // Riabilita il pulsante timer
             if (timerBtn) timerBtn.disabled = false;
-            if (stopBtn) stopBtn.disabled = false;
             
             // Ferma il movimento del pulsante
             clearInterval(moveMessageInterval);
@@ -741,7 +787,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Posizione iniziale casuale
             setRandomPosition();
             
-            // Imposta un intervallo per muovere il pulsante ogni 3 secondi
+            // Imposta un intervallo per muovere il pulsante ogni 8 secondi
             moveMessageInterval = setInterval(() => {
                 setRandomPosition();
             }, 3000);
@@ -772,23 +818,19 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // Gestione del pulsante di blocco
-        if (lockBtn) {
-            lockBtn.addEventListener('click', function(event) {
-                event.stopPropagation();
-                if (screenLocked) {
-                    unlockScreen();
-                } else {
-                    lockScreen();
-                }
-            });
-        }
+        lockBtn.addEventListener('click', function(event) {
+            event.stopPropagation();
+            if (screenLocked) {
+                unlockScreen();
+            } else {
+                lockScreen();
+            }
+        });
 
         // Sblocco tramite il pulsante nell'overlay
-        if (unlockBtn) {
-            unlockBtn.addEventListener('click', function() {
-                unlockScreen();
-            });
-        }
+        unlockBtn.addEventListener('click', function() {
+            unlockScreen();
+        });
 
         // Impedisci che lo schermo si spenga automaticamente
         let wakeLock = null;
@@ -815,120 +857,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Attiva Wake Lock all'avvio dell'app
         requestWakeLock();
-        
-        // Gestione dell'installazione PWA
-        const installContainer = document.getElementById('install-container');
-        const installBtn = document.getElementById('install-btn');
-        const installSuccess = document.getElementById('install-success');
-        let deferredPrompt;
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            // Previene la visualizzazione del prompt predefinito
-            e.preventDefault();
-            
-            // Salva l'evento per mostrarlo in seguito
-            deferredPrompt = e;
-            
-            // Mostra il pulsante di installazione
-            if (installContainer) installContainer.style.display = 'block';
-            
-            console.log('L\'app può essere installata');
-        });
-
-        // Evento click sul pulsante di installazione
-        if (installBtn) {
-            installBtn.addEventListener('click', () => {
-                // Verifica se l'evento deferredPrompt è disponibile
-                if (!deferredPrompt) {
-                    console.log('Evento di installazione non disponibile');
-                    return;
-                }
-                
-                // Mostra il prompt di installazione
-                deferredPrompt.prompt();
-                
-                // Nascondi il pulsante di installazione durante il prompt
-                installContainer.style.display = 'none';
-                
-                // Attende la scelta dell'utente
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('Utente ha accettato l\'installazione');
-                        showInstallSuccess();
-                    } else {
-                        console.log('Utente ha rifiutato l\'installazione');
-                        // Mostra di nuovo il pulsante se l'utente rifiuta
-                        setTimeout(() => {
-                            installContainer.style.display = 'block';
-                        }, 3000);
-                    }
-                    
-                    // Reset della variabile prompt
-                    deferredPrompt = null;
-                });
-            });
-        }
-
-        // Mostra il messaggio di installazione completata
-        function showInstallSuccess() {
-            if (installSuccess) {
-                installSuccess.classList.add('show');
-                
-                // Nascondi il messaggio dopo 3 secondi
-                setTimeout(() => {
-                    installSuccess.classList.remove('show');
-                }, 3000);
-            }
-        }
-
-        // Controlla se l'app è già installata
-        window.addEventListener('appinstalled', (evt) => {
-            console.log('App installata con successo!');
-            if (installContainer) installContainer.style.display = 'none';
-            showInstallSuccess();
-        });
-
-        // Verifica se l'app è già in modalità standalone (già installata)
-        if (window.matchMedia('(display-mode: standalone)').matches || 
-            window.navigator.standalone === true) {
-            console.log('App già installata e in esecuzione in modalità standalone');
-            if (installContainer) installContainer.style.display = 'none';
-        }
-
-        // Funzione per controllare periodicamente se l'app può essere installata
-        function checkInstallability() {
-            // Su iOS, navigator.standalone è true se l'app è installata
-            const isIOSInstalled = window.navigator.standalone === true;
-            
-            // Su altri browser, matchMedia controlla la modalità display
-            const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-            
-            // Se già installata, nascondi il pulsante
-            if (isIOSInstalled || isStandalone) {
-                if (installContainer) installContainer.style.display = 'none';
-            } 
-            // Altrimenti, se l'evento di installazione è disponibile, mostra il pulsante
-            else if (deferredPrompt && installContainer) {
-                installContainer.style.display = 'block';
-            }
-        }
-
-        // Controlla ogni 5 secondi se l'app può essere installata
-        setInterval(checkInstallability, 5000);
-
-        // Gestione media query per rilevare cambiamenti nella modalità di visualizzazione
-        window.matchMedia('(display-mode: standalone)').addEventListener('change', (e) => {
-            if (e.matches) {
-                console.log('App ora in modalità standalone');
-                if (installContainer) installContainer.style.display = 'none';
-            }
-        });
-        
-        // Esponi la funzione stopAllSounds globalmente per permetterne l'uso da altre parti
-        window.stopAllSounds = stopAllSounds;
-        
-        // Messaggio di inizializzazione
-        console.log("Controlli volume inizializzati");
     }
 
     // Messaggio di debug
@@ -1152,51 +1080,3 @@ document.head.appendChild(offlineStyle);
 // Ascolta i cambiamenti di connettività
 window.addEventListener('online', checkConnectionAndCacheStatus);
 window.addEventListener('offline', checkConnectionAndCacheStatus);
-
-// Disabilita i gesti di pinch-to-zoom
-function disableZoom() {
-    // Evita il doppio tap su iOS
-    let lastTouchEnd = 0;
-    document.addEventListener('touchend', function(event) {
-        const now = Date.now();
-        if (now - lastTouchEnd <= 300) {
-            event.preventDefault();
-        }
-        lastTouchEnd = now;
-    }, {passive: false});
-    
-    // Previeni i gesti di pinch
-    document.addEventListener('touchmove', function(event) {
-        // Previeni zoom solo se ci sono 2 o più tocchi (pinch)
-        if (event.touches.length > 1) {
-            event.preventDefault();
-        }
-    }, {passive: false});
-    
-    // Previeni il gesto di zoom con due dita
-    document.addEventListener('gesturestart', function(event) {
-        event.preventDefault();
-    }, {passive: false});
-    
-    // Previeni anche l'avvio di gesture
-    document.addEventListener('gesturechange', function(event) {
-        event.preventDefault();
-    }, {passive: false});
-    
-    // E la fine delle gesture
-    document.addEventListener('gestureend', function(event) {
-        event.preventDefault();
-    }, {passive: false});
-    
-    // Previeni lo scroll con Ctrl + mouse wheel (zoom comune sui desktop)
-    document.addEventListener('wheel', function(event) {
-        if (event.ctrlKey) {
-            event.preventDefault();
-        }
-    }, {passive: false});
-    
-    console.log('Zoom disabilitato');
-}
-
-// Chiama la funzione per disabilitare lo zoom
-disableZoom();
