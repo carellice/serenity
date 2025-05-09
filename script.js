@@ -432,141 +432,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Inizializza gli slider
     function initializeSliders() {
-        const sliders = document.querySelectorAll('.slider');
-        
-        // Funzione comune per gestire i cambiamenti di volume
-        function handleVolumeChange(slider) {
-            const soundId = slider.dataset.sound;
-            const volume = slider.value / 100;
-            
-            if (isIOS) {
-                playIOSSoundWithWebAudio(soundId, volume);
-            } else {
-                playStandardSound(soundId, volume);
-            }
-        }
-        
-        // Aggiungi event listener a tutti gli slider
-        sliders.forEach(slider => {
-            // Per iOS, aggiungi un evento di click diretto che farà sbloccare l'audio
-            if (isIOS) {
-                slider.addEventListener('click', function(e) {
-                    // Sblocca l'audio al primo click
-                    if (!audioUnlocked) {
-                        unlockAudio();
-                    }
-                    
-                    // Calcola la posizione relativa del click
-                    const rect = this.getBoundingClientRect();
-                    const clickPosition = e.clientX - rect.left;
-                    const newValue = Math.round((clickPosition / rect.width) * 100);
-                    
-                    // Limita il valore tra 0 e 100
-                    this.value = Math.max(0, Math.min(100, newValue));
-                    handleVolumeChange(this);
-                });
-            }
-            
-            // Evento principale per i cambiamenti di input
-            slider.addEventListener('input', function() {
-                handleVolumeChange(this);
-            });
-            
-            // Altri eventi standard
-            slider.addEventListener('change', function() {
-                handleVolumeChange(this);
-            });
-            
-            slider.addEventListener('touchend', function() {
-                handleVolumeChange(this);
-            });
-            
-            // Sblocco audio al primo touch
-            slider.addEventListener('touchstart', function() {
-                if (!audioUnlocked) {
-                    unlockAudio();
-                }
-            });
-            
-            // Per iOS, touch events specifici
-            if (isIOS) {
-                slider.addEventListener('touchmove', function(e) {
-                    // Calcola la posizione relativa del touch
-                    const rect = this.getBoundingClientRect();
-                    const touchPosition = e.touches[0].clientX - rect.left;
-                    const newValue = Math.round((touchPosition / rect.width) * 100);
-                    
-                    // Limita il valore tra 0 e 100
-                    this.value = Math.max(0, Math.min(100, newValue));
-                    handleVolumeChange(this);
-                    
-                    // Previeni lo scroll
-                    e.preventDefault();
-                });
-                
-                // Overlay migliorato per iOS
-                const soundItem = slider.closest('.sound-item');
-                if (soundItem) {
-                    const sliderContainer = slider.closest('.volume-slider');
-                    if (sliderContainer) {
-                        const overlay = document.createElement('div');
-                        overlay.className = 'ios-slider-overlay';
-                        
-                        // Posiziona l'overlay
-                        sliderContainer.style.position = 'relative';
-                        
-                        // Eventi touch dell'overlay
-                        overlay.addEventListener('touchstart', function(e) {
-                            // Sblocca audio se necessario
-                            if (!audioUnlocked) {
-                                unlockAudio();
-                            }
-                            
-                            // Calcola posizione
-                            const rect = slider.getBoundingClientRect();
-                            const touchX = e.touches[0].clientX - rect.left;
-                            const percent = Math.max(0, Math.min(1, touchX / rect.width));
-                            
-                            // Imposta valore
-                            slider.value = Math.round(percent * 100);
-                            handleVolumeChange(slider);
-                            
-                            e.preventDefault();
-                        });
-                        
-                        overlay.addEventListener('touchmove', function(e) {
-                            const rect = slider.getBoundingClientRect();
-                            const touchX = e.touches[0].clientX - rect.left;
-                            const percent = Math.max(0, Math.min(1, touchX / rect.width));
-                            
-                            slider.value = Math.round(percent * 100);
-                            handleVolumeChange(slider);
-                            
-                            e.preventDefault();
-                        });
-                        
-                        // Aggiungi l'overlay
-                        sliderContainer.appendChild(overlay);
-                    }
-                }
-            }
-        });
-
-        // Sblocco globale al primo tocco
-        document.addEventListener('touchstart', function() {
-            if (!audioUnlocked) {
-                unlockAudio();
-            }
-        }, {once: true});
+        // Variabili necessarie per il timer e altre funzionalità
+        let timerInterval;
+        let remainingTime = 0;
+        let screenLocked = false;
+        let moveMessageInterval;
+        let anyPlaying = false;
 
         // Gestione migliorata del timer
         const timerBtn = document.getElementById('timer-btn');
         const timerModal = document.getElementById('timer-modal');
         const timerOptions = document.querySelectorAll('.timer-options button');
         const timerStatus = document.getElementById('timer-status');
-        let timerInterval;
-        let remainingTime = 0;
-
+        
         // Mostra/nascondi modale timer
         timerBtn.addEventListener('click', function(event) {
             event.stopPropagation();
@@ -669,15 +547,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
-            // Reset sliders
-            sliders.forEach(slider => {
-                slider.value = 0;
+            // Aggiorna lo stato del pulsante e le card (implementato più avanti)
+            updateStopButtonState(false);
+            
+            // Rimuovi la classe active da tutte le card dei suoni
+            const soundCards = document.querySelectorAll('.sound-item-card');
+            soundCards.forEach(card => {
+                card.classList.remove('active');
             });
         }
 
         // Gestione del pulsante di stop
         const stopBtn = document.getElementById('stop-btn');
-        let anyPlaying = false; // Flag per tracciare se c'è almeno un suono in riproduzione
 
         // Aggiungi l'event listener al pulsante stop
         stopBtn.addEventListener('click', function() {
@@ -696,53 +577,27 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        // Funzione comune per gestire i cambiamenti di volume
-        function handleVolumeChange(slider) {
-            const soundId = slider.dataset.sound;
-            const volume = slider.value / 100;
-            
-            if (isIOS) {
-                playIOSSoundWithWebAudio(soundId, volume);
-            } else {
-                playStandardSound(soundId, volume);
-            }
-            
-            // Controlla se almeno un suono è attivo
-            checkActiveSounds();
-        }
-
         // Funzione per verificare se ci sono suoni attivi
         function checkActiveSounds() {
             let hasActiveSounds = false;
             
-            // Verifica tutti gli slider
-            sliders.forEach(slider => {
-                if (parseInt(slider.value) > 0) {
+            // Verifica tutti i suoni
+            for (const soundId in sounds) {
+                if (sounds[soundId] && sounds[soundId].volume > 0) {
                     hasActiveSounds = true;
+                    break;
                 }
-            });
+            }
             
             // Aggiorna lo stato del pulsante stop
             updateStopButtonState(hasActiveSounds);
         }
-
-        // Aggiorna la funzione stopAllSounds per chiamare anche updateStopButtonState
-        const originalStopAllSounds = stopAllSounds;
-        stopAllSounds = function() {
-            originalStopAllSounds();
-            updateStopButtonState(false);
-        };
-
-        // Esegui un controllo iniziale dei suoni attivi
-        setTimeout(checkActiveSounds, 1000);
 
         // Gestione del blocco schermo
         const lockBtn = document.getElementById('lock-btn');
         const screenLockOverlay = document.querySelector('.screen-lock-overlay');
         const lockMessage = document.querySelector('.lock-message');
         const unlockBtn = document.querySelector('.unlock-btn');
-        let screenLocked = false;
-        let moveMessageInterval;
 
         // Funzione per bloccare lo schermo
         function lockScreen() {
@@ -751,12 +606,7 @@ document.addEventListener('DOMContentLoaded', function() {
             lockBtn.classList.add('locked');
             screenLockOverlay.classList.add('active');
             
-            // Disabilita tutti gli slider
-            sliders.forEach(slider => {
-                slider.disabled = true;
-            });
-            
-            // Disabilita anche il pulsante timer
+            // Disabilita il pulsante timer
             if (timerBtn) timerBtn.disabled = true;
             
             // Inizia a muovere il pulsante di sblocco per evitare burn-in
@@ -769,11 +619,6 @@ document.addEventListener('DOMContentLoaded', function() {
             lockBtn.innerHTML = '<i class="fas fa-lock-open"></i>';
             lockBtn.classList.remove('locked');
             screenLockOverlay.classList.remove('active');
-            
-            // Abilita tutti gli slider
-            sliders.forEach(slider => {
-                slider.disabled = false;
-            });
             
             // Riabilita il pulsante timer
             if (timerBtn) timerBtn.disabled = false;
@@ -857,6 +702,124 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Attiva Wake Lock all'avvio dell'app
         requestWakeLock();
+        
+        // NUOVA FUNZIONALITÀ: Setup del modal per il volume
+        const volumeModal = document.getElementById('volume-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const modalSlider = document.getElementById('modal-slider');
+        const modalIcon = document.getElementById('modal-icon');
+        const modalTitle = document.getElementById('modal-title');
+        const volumePercentage = document.getElementById('volume-percentage');
+        
+        let currentSoundId = null;
+        
+        // Ottieni tutte le card dei suoni
+        const soundCards = document.querySelectorAll('.sound-item-card');
+        
+        // Aggiungi event listeners alle card
+        soundCards.forEach(card => {
+            card.addEventListener('click', function() {
+                if (screenLocked) return; // Non fare nulla se lo schermo è bloccato
+                
+                // Ottieni i dati del suono
+                const soundId = this.dataset.sound;
+                const soundLabel = this.querySelector('.sound-label').textContent;
+                const soundIcon = this.querySelector('.sound-icon i').className;
+                
+                // Imposta i dati nel modal
+                currentSoundId = soundId;
+                modalTitle.textContent = soundLabel;
+                modalIcon.className = soundIcon;
+                
+                // Imposta il valore dello slider
+                if (sounds[soundId]) {
+                    const volumeValue = sounds[soundId].volume * 100 || 0;
+                    modalSlider.value = volumeValue;
+                    volumePercentage.textContent = `${Math.round(volumeValue)}%`;
+                } else {
+                    modalSlider.value = 0;
+                    volumePercentage.textContent = "0%";
+                }
+                
+                // Mostra il modal
+                volumeModal.classList.remove('hidden');
+                
+                // Sblocca l'audio se necessario
+                if (!audioUnlocked) {
+                    unlockAudio();
+                }
+            });
+        });
+        
+        // Event listener per lo slider del modal
+        modalSlider.addEventListener('input', function() {
+            if (!currentSoundId) return;
+            
+            const volume = this.value / 100;
+            volumePercentage.textContent = `${Math.round(this.value)}%`;
+            
+            // Riproduci il suono con il volume impostato
+            if (isIOS) {
+                playIOSSoundWithWebAudio(currentSoundId, volume);
+            } else {
+                playStandardSound(currentSoundId, volume);
+            }
+            
+            // Aggiorna l'indicatore visivo sulla card
+            updateSoundCardStatus(currentSoundId, volume);
+            
+            // Controlla se almeno un suono è attivo per aggiornare il pulsante di stop
+            checkActiveSounds();
+        });
+        
+        // Chiudi il modal
+        closeModalBtn.addEventListener('click', function() {
+            volumeModal.classList.add('hidden');
+            currentSoundId = null;
+        });
+        
+        // Chiudi il modal quando si fa click fuori dal contenuto
+        volumeModal.addEventListener('click', function(event) {
+            if (event.target === volumeModal) {
+                volumeModal.classList.add('hidden');
+                currentSoundId = null;
+            }
+        });
+        
+        // Funzione per aggiornare lo stato visivo delle card
+        function updateSoundCardStatus(soundId, volume) {
+            soundCards.forEach(card => {
+                if (card.dataset.sound === soundId) {
+                    if (volume > 0) {
+                        card.classList.add('active');
+                    } else {
+                        card.classList.remove('active');
+                    }
+                }
+            });
+        }
+        
+        // Inizializza lo stato delle card in base ai suoni attivi
+        function initializeCardStatus() {
+            for (const soundId in sounds) {
+                if (sounds[soundId] && sounds[soundId].volume > 0) {
+                    updateSoundCardStatus(soundId, sounds[soundId].volume);
+                }
+            }
+            
+            // Controlla se ci sono suoni attivi per aggiornare il pulsante di stop
+            checkActiveSounds();
+        }
+        
+        // Esegui l'inizializzazione dopo il caricamento
+        setTimeout(initializeCardStatus, 1000);
+        
+        // Sblocco globale al primo tocco
+        document.addEventListener('touchstart', function() {
+            if (!audioUnlocked) {
+                unlockAudio();
+            }
+        }, {once: true});
     }
 
     // Messaggio di debug
@@ -999,6 +962,22 @@ function checkConnectionAndCacheStatus() {
   
   if (!isOnline) {
     // Se siamo offline, verifichiamo che tutti i file audio siano in cache
+    const soundFiles = [
+        'white-noise.mp3',
+        'brown-noise.mp3',
+        'pink-noise.mp3',
+        'rain.wav',
+        'storm.mp3',
+        'wind.mp3',
+        'stream.mp3',
+        'birds.mp3',
+        'waves.mp3',
+        'boat.mp3',
+        'city.mp3',
+        'fireplace.mp3',
+        'hair-dryer.mp3'
+    ];
+    
     Promise.all(
       soundFiles.map(file => {
         return caches.match(`sounds/${file}`)
