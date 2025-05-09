@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Serenity - Relaxing Sounds</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="icon.png" type="image/x-icon">
     <link rel="shortcut icon" href="icon.png" type="image/x-icon">
-
+    
     <!-- Metadati per PWA -->
     <meta name="theme-color" content="#121212">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -21,15 +21,6 @@
     <link rel="apple-touch-icon" href="icons/apple-icon-152x152.png" sizes="152x152">
     <link rel="apple-touch-icon" href="icons/apple-icon-167x167.png" sizes="167x167">
     <link rel="apple-touch-icon" href="icons/apple-icon-180x180.png" sizes="180x180">
-
-    <!-- Splash screen per iOS -->
-    <link rel="apple-touch-startup-image" href="icons/apple-splash-2048-2732.png" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="icons/apple-splash-1668-2388.png" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="icons/apple-splash-1536-2048.png" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="icons/apple-splash-1125-2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="icons/apple-splash-1242-2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="icons/apple-splash-828-1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
-    <link rel="apple-touch-startup-image" href="icons/apple-splash-640-1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
 </head>
 <body class="dark-theme">
     <div class="container">
@@ -51,7 +42,7 @@
                     </div>
                 </div>
                 <div class="stop-container">
-                    <button id="stop-btn"><i class="fas fa-stop"></i></button>
+                    <button id="stop-btn"><i class="fas fa-stop-circle"></i></button>
                 </div>
                 <div class="lock-container">
                     <button id="lock-btn"><i class="fas fa-lock-open"></i></button>
@@ -66,8 +57,20 @@
                     <i class="fas fa-wave-square"></i>
                     <span>White Noise</span>
                 </div>
-                <div class="volume-slider">
-                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="white-noise.mp3">
+                <div class="volume-buttons">
+                    <button class="volume-btn mute" data-sound="white-noise.mp3" data-action="mute">
+                        <i class="fas fa-volume-mute"></i>
+                    </button>
+                    <button class="volume-btn decrease" data-sound="white-noise.mp3" data-action="decrease">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <div class="volume-value" data-sound="white-noise.mp3">0%</div>
+                    <button class="volume-btn increase" data-sound="white-noise.mp3" data-action="increase">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <div class="volume-indicator">
+                        <div class="volume-fill" data-sound="white-noise.mp3" style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
             <div class="sound-item">
@@ -75,8 +78,20 @@
                     <i class="fas fa-wave-square"></i>
                     <span>Brown Noise</span>
                 </div>
-                <div class="volume-slider">
-                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="brown-noise.mp3">
+                <div class="volume-buttons">
+                    <button class="volume-btn mute" data-sound="brown-noise.mp3" data-action="mute">
+                        <i class="fas fa-volume-mute"></i>
+                    </button>
+                    <button class="volume-btn decrease" data-sound="brown-noise.mp3" data-action="decrease">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <div class="volume-value" data-sound="brown-noise.mp3">0%</div>
+                    <button class="volume-btn increase" data-sound="brown-noise.mp3" data-action="increase">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <div class="volume-indicator">
+                        <div class="volume-fill" data-sound="brown-noise.mp3" style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
             <div class="sound-item">
@@ -84,8 +99,20 @@
                     <i class="fas fa-wave-square"></i>
                     <span>Pink Noise</span>
                 </div>
-                <div class="volume-slider">
-                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="pink-noise.mp3">
+                <div class="volume-buttons">
+                    <button class="volume-btn mute" data-sound="pink-noise.mp3" data-action="mute">
+                        <i class="fas fa-volume-mute"></i>
+                    </button>
+                    <button class="volume-btn decrease" data-sound="pink-noise.mp3" data-action="decrease">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <div class="volume-value" data-sound="pink-noise.mp3">0%</div>
+                    <button class="volume-btn increase" data-sound="pink-noise.mp3" data-action="increase">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <div class="volume-indicator">
+                        <div class="volume-fill" data-sound="pink-noise.mp3" style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -97,8 +124,20 @@
                     <i class="fas fa-cloud-rain"></i>
                     <span>Rain</span>
                 </div>
-                <div class="volume-slider">
-                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="rain.wav">
+                <div class="volume-buttons">
+                    <button class="volume-btn mute" data-sound="rain.wav" data-action="mute">
+                        <i class="fas fa-volume-mute"></i>
+                    </button>
+                    <button class="volume-btn decrease" data-sound="rain.wav" data-action="decrease">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <div class="volume-value" data-sound="rain.wav">0%</div>
+                    <button class="volume-btn increase" data-sound="rain.wav" data-action="increase">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <div class="volume-indicator">
+                        <div class="volume-fill" data-sound="rain.wav" style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
             <div class="sound-item">
@@ -106,8 +145,20 @@
                     <i class="fas fa-bolt"></i>
                     <span>Storm</span>
                 </div>
-                <div class="volume-slider">
-                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="storm.mp3">
+                <div class="volume-buttons">
+                    <button class="volume-btn mute" data-sound="storm.mp3" data-action="mute">
+                        <i class="fas fa-volume-mute"></i>
+                    </button>
+                    <button class="volume-btn decrease" data-sound="storm.mp3" data-action="decrease">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <div class="volume-value" data-sound="storm.mp3">0%</div>
+                    <button class="volume-btn increase" data-sound="storm.mp3" data-action="increase">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <div class="volume-indicator">
+                        <div class="volume-fill" data-sound="storm.mp3" style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
             <div class="sound-item">
@@ -115,8 +166,20 @@
                     <i class="fas fa-wind"></i>
                     <span>Wind</span>
                 </div>
-                <div class="volume-slider">
-                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="wind.mp3">
+                <div class="volume-buttons">
+                    <button class="volume-btn mute" data-sound="wind.mp3" data-action="mute">
+                        <i class="fas fa-volume-mute"></i>
+                    </button>
+                    <button class="volume-btn decrease" data-sound="wind.mp3" data-action="decrease">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <div class="volume-value" data-sound="wind.mp3">0%</div>
+                    <button class="volume-btn increase" data-sound="wind.mp3" data-action="increase">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <div class="volume-indicator">
+                        <div class="volume-fill" data-sound="wind.mp3" style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
             <div class="sound-item">
@@ -124,8 +187,20 @@
                     <i class="fas fa-water"></i>
                     <span>Stream</span>
                 </div>
-                <div class="volume-slider">
-                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="stream.mp3">
+                <div class="volume-buttons">
+                    <button class="volume-btn mute" data-sound="stream.mp3" data-action="mute">
+                        <i class="fas fa-volume-mute"></i>
+                    </button>
+                    <button class="volume-btn decrease" data-sound="stream.mp3" data-action="decrease">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <div class="volume-value" data-sound="stream.mp3">0%</div>
+                    <button class="volume-btn increase" data-sound="stream.mp3" data-action="increase">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <div class="volume-indicator">
+                        <div class="volume-fill" data-sound="stream.mp3" style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
             <div class="sound-item">
@@ -133,8 +208,20 @@
                     <i class="fas fa-dove"></i>
                     <span>Birds</span>
                 </div>
-                <div class="volume-slider">
-                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="birds.mp3">
+                <div class="volume-buttons">
+                    <button class="volume-btn mute" data-sound="birds.mp3" data-action="mute">
+                        <i class="fas fa-volume-mute"></i>
+                    </button>
+                    <button class="volume-btn decrease" data-sound="birds.mp3" data-action="decrease">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <div class="volume-value" data-sound="birds.mp3">0%</div>
+                    <button class="volume-btn increase" data-sound="birds.mp3" data-action="increase">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <div class="volume-indicator">
+                        <div class="volume-fill" data-sound="birds.mp3" style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
             <div class="sound-item">
@@ -142,8 +229,20 @@
                     <i class="fas fa-water"></i>
                     <span>Waves</span>
                 </div>
-                <div class="volume-slider">
-                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="waves.mp3">
+                <div class="volume-buttons">
+                    <button class="volume-btn mute" data-sound="waves.mp3" data-action="mute">
+                        <i class="fas fa-volume-mute"></i>
+                    </button>
+                    <button class="volume-btn decrease" data-sound="waves.mp3" data-action="decrease">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <div class="volume-value" data-sound="waves.mp3">0%</div>
+                    <button class="volume-btn increase" data-sound="waves.mp3" data-action="increase">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <div class="volume-indicator">
+                        <div class="volume-fill" data-sound="waves.mp3" style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -155,8 +254,20 @@
                     <i class="fas fa-ship"></i>
                     <span>Boat</span>
                 </div>
-                <div class="volume-slider">
-                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="boat.mp3">
+                <div class="volume-buttons">
+                    <button class="volume-btn mute" data-sound="boat.mp3" data-action="mute">
+                        <i class="fas fa-volume-mute"></i>
+                    </button>
+                    <button class="volume-btn decrease" data-sound="boat.mp3" data-action="decrease">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <div class="volume-value" data-sound="boat.mp3">0%</div>
+                    <button class="volume-btn increase" data-sound="boat.mp3" data-action="increase">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <div class="volume-indicator">
+                        <div class="volume-fill" data-sound="boat.mp3" style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
             <div class="sound-item">
@@ -164,8 +275,20 @@
                     <i class="fas fa-city"></i>
                     <span>City</span>
                 </div>
-                <div class="volume-slider">
-                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="city.mp3">
+                <div class="volume-buttons">
+                    <button class="volume-btn mute" data-sound="city.mp3" data-action="mute">
+                        <i class="fas fa-volume-mute"></i>
+                    </button>
+                    <button class="volume-btn decrease" data-sound="city.mp3" data-action="decrease">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <div class="volume-value" data-sound="city.mp3">0%</div>
+                    <button class="volume-btn increase" data-sound="city.mp3" data-action="increase">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <div class="volume-indicator">
+                        <div class="volume-fill" data-sound="city.mp3" style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -177,8 +300,20 @@
                     <i class="fas fa-fire"></i>
                     <span>Fireplace</span>
                 </div>
-                <div class="volume-slider">
-                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="fireplace.mp3">
+                <div class="volume-buttons">
+                    <button class="volume-btn mute" data-sound="fireplace.mp3" data-action="mute">
+                        <i class="fas fa-volume-mute"></i>
+                    </button>
+                    <button class="volume-btn decrease" data-sound="fireplace.mp3" data-action="decrease">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <div class="volume-value" data-sound="fireplace.mp3">0%</div>
+                    <button class="volume-btn increase" data-sound="fireplace.mp3" data-action="increase">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <div class="volume-indicator">
+                        <div class="volume-fill" data-sound="fireplace.mp3" style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
             <div class="sound-item">
@@ -186,8 +321,20 @@
                     <i class="fas fa-temperature-full"></i>
                     <span>Hair Dryer</span>
                 </div>
-                <div class="volume-slider">
-                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="hair-dryer.mp3">
+                <div class="volume-buttons">
+                    <button class="volume-btn mute" data-sound="hair-dryer.mp3" data-action="mute">
+                        <i class="fas fa-volume-mute"></i>
+                    </button>
+                    <button class="volume-btn decrease" data-sound="hair-dryer.mp3" data-action="decrease">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <div class="volume-value" data-sound="hair-dryer.mp3">0%</div>
+                    <button class="volume-btn increase" data-sound="hair-dryer.mp3" data-action="increase">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <div class="volume-indicator">
+                        <div class="volume-fill" data-sound="hair-dryer.mp3" style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -198,15 +345,6 @@
     </footer>
 
     <!-- Overlay per il blocco schermo -->
-    <div class="screen-lock-overlay">
-        <div class="lock-message">
-            <i class="fas fa-lock"></i>
-            <p>Schermo bloccato</p>
-            <button class="unlock-btn">Sblocca</button>
-        </div>
-    </div>
-
-    <!-- Elemento anti burn-in per schermi OLED -->
     <div class="screen-lock-overlay">
         <div class="lock-message">
             <i class="fas fa-lock"></i>
