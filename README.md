@@ -16,7 +16,7 @@ Serenity is a minimalist web application designed to help you relax and sleep be
 
 ## 🖥️ Live Demo
 
-Experience Serenity: [https://yourusername.github.io/serenity](https://yourusername.github.io/serenity)
+Experience Serenity: [https://carellice.github.io/serenity/](https://carellice.github.io/serenity/)
 
 ## 🚀 Getting Started
 
