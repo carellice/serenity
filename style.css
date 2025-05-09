@@ -805,3 +805,363 @@ html, body {
         display: none !important;
     }
 }
+
+/* Soluzione per rendere cliccabile solo il pallino dello slider */
+input[type=range] {
+  pointer-events: none; /* Disabilita eventi sulla barra */
+  background: transparent; /* Rende la barra trasparente */
+}
+
+/* Rendi il thumb cliccabile */
+input[type=range]::-webkit-slider-thumb {
+  pointer-events: auto; /* Solo il pallino accetta eventi */
+  cursor: grab;
+}
+
+input[type=range]::-moz-range-thumb {
+  pointer-events: auto;
+  cursor: grab;
+}
+
+input[type=range]::-ms-thumb {
+  pointer-events: auto;
+  cursor: grab;
+}
+
+/* Durante il trascinamento */
+input[type=range]::-webkit-slider-thumb:active {
+  cursor: grabbing;
+}
+
+input[type=range]::-moz-range-thumb:active {
+  cursor: grabbing;
+}
+
+input[type=range]::-ms-thumb:active {
+  cursor: grabbing;
+}
+
+/* Rendi l'aspetto visivo della barra mantenendo l'effetto originale */
+.volume-slider {
+  position: relative;
+}
+
+.volume-slider::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 4px;
+  width: 100%;
+  background: var(--slider-bg);
+  border-radius: 2px;
+  pointer-events: none; /* Assicura che questo elemento non riceva eventi */
+}
+
+/* Soluzione migliorata per rendere cliccabile solo il pallino dello slider */
+input[type=range] {
+  pointer-events: none; /* Disabilita eventi sulla barra */
+  background: transparent !important; /* Rende la barra trasparente */
+  z-index: 1; /* Assicura che lo slider sia sopra lo pseudo-elemento */
+  position: relative; /* Necessario per il z-index */
+}
+
+/* Rendi il thumb cliccabile e assicurati che sia sempre visibile */
+input[type=range]::-webkit-slider-thumb {
+  pointer-events: auto; /* Solo il pallino accetta eventi */
+  cursor: grab;
+  position: relative;
+  z-index: 3; /* Posiziona il thumb sopra la barra */
+}
+
+input[type=range]::-moz-range-thumb {
+  pointer-events: auto;
+  cursor: grab;
+  position: relative;
+  z-index: 3;
+}
+
+input[type=range]::-ms-thumb {
+  pointer-events: auto;
+  cursor: grab;
+  position: relative;
+  z-index: 3;
+}
+
+/* Durante il trascinamento */
+input[type=range]::-webkit-slider-thumb:active {
+  cursor: grabbing;
+}
+
+input[type=range]::-moz-range-thumb:active {
+  cursor: grabbing;
+}
+
+input[type=range]::-ms-thumb:active {
+  cursor: grabbing;
+}
+
+/* Miglioramento per la barra visiva */
+.volume-slider {
+  position: relative;
+}
+
+/* Barra visiva dello slider che rispetta i limiti */
+.volume-slider::before {
+  content: "";
+  position: absolute;
+  left: 9px; /* Aggiusta per evitare che vada oltre i limiti */
+  right: 9px; /* Aggiusta per evitare che vada oltre i limiti */
+  top: 50%;
+  transform: translateY(-50%);
+  height: 4px;
+  width: auto; /* Usa auto invece di 100% */
+  background: var(--slider-bg);
+  border-radius: 2px;
+  pointer-events: none; /* Assicura che questo elemento non riceva eventi */
+  z-index: 0; /* Posiziona sotto lo slider */
+}
+
+/* Assicurati che l'hover sul thumb non mostri la barra sopra */
+input[type=range]:hover::-webkit-slider-thumb {
+  z-index: 3;
+}
+
+input[type=range]:hover::-moz-range-thumb {
+  z-index: 3;
+}
+
+input[type=range]:hover::-ms-thumb {
+  z-index: 3;
+}
+
+/* Aggiunge un padding che migliora l'aspetto complessivo */
+.slider {
+  padding: 2px 0; /* Aggiunge spazio sopra e sotto */
+}
+
+/* Garantisce che quando il thumb è sopra la barra, sia sempre visibile */
+.slider:hover {
+  z-index: 2; /* Aumenta il z-index durante hover */
+}
+
+/* Aggiunta per garantire che il thumb sia sempre visibile e in primo piano */
+input[type=range]:focus::-webkit-slider-thumb {
+  z-index: 4; /* Ancora più alto quando in focus */
+  box-shadow: 0 0 0 2px var(--accent-color); /* Effetto focus visibile */
+}
+
+input[type=range]:focus::-moz-range-thumb {
+  z-index: 4;
+  box-shadow: 0 0 0 2px var(--accent-color);
+}
+
+/* Rafforza la barra per assicurarsi che rispetti i limiti */
+.volume-slider::before {
+  box-sizing: border-box; /* Garantisce che il padding non influisca sulla larghezza */
+}
+
+/* Soluzione per rendere cliccabile solo il pallino dello slider */
+input[type=range] {
+  pointer-events: none; /* Disabilita eventi sulla barra */
+  background: transparent !important; /* Rende la barra trasparente */
+  z-index: 1; /* Assicura che lo slider sia sopra lo pseudo-elemento */
+  position: relative; /* Necessario per il z-index */
+}
+
+/* Rendi il thumb cliccabile */
+input[type=range]::-webkit-slider-thumb {
+  pointer-events: auto; /* Solo il pallino accetta eventi */
+  cursor: grab;
+  position: relative;
+  z-index: 3; /* Posiziona il thumb sopra la barra */
+}
+
+input[type=range]::-moz-range-thumb {
+  pointer-events: auto;
+  cursor: grab;
+  position: relative;
+  z-index: 3;
+}
+
+/* Durante il trascinamento */
+input[type=range]::-webkit-slider-thumb:active {
+  cursor: grabbing;
+}
+
+input[type=range]::-moz-range-thumb:active {
+  cursor: grabbing;
+}
+
+/* Configurazione migliorata per la barra visiva */
+.volume-slider {
+  position: relative;
+}
+
+/* Barra visiva dello slider che rispetta i limiti - versione migliorata */
+.volume-slider::before {
+  content: "";
+  position: absolute;
+  /* Calcolo preciso della posizione orizzontale */
+  left: 14px; /* Valore aumentato per compensare il thumb */
+  right: 14px; /* Valore aumentato per compensare il thumb */
+  top: 50%;
+  transform: translateY(-50%);
+  height: 4px;
+  width: auto; /* Usa auto invece di 100% */
+  background: var(--slider-bg);
+  border-radius: 2px;
+  pointer-events: none; /* Assicura che questo elemento non riceva eventi */
+  z-index: 0; /* Posiziona sotto lo slider */
+}
+
+/* Assicurati che l'hover sul thumb non mostri la barra sopra */
+input[type=range]:hover::-webkit-slider-thumb {
+  z-index: 3;
+}
+
+input[type=range]:hover::-moz-range-thumb {
+  z-index: 3;
+}
+
+/* Aggiunge un padding che migliora l'aspetto complessivo */
+.slider {
+  padding: 2px 0; /* Aggiunge spazio sopra e sotto */
+  margin: 0; /* Assicura che non ci siano margini che influenzano la posizione */
+}
+
+/* Garantisce che quando il thumb è sopra la barra, sia sempre visibile */
+.slider:hover {
+  z-index: 2; /* Aumenta il z-index durante hover */
+}
+
+/* Migliora l'aspetto del container dello slider */
+.volume-slider {
+  padding: 0; /* Rimuove padding che potrebbero influenzare la posizione */
+  box-sizing: border-box; /* Garantisce calcoli coerenti */
+}
+
+/* Approccio alternativo per la barra visiva */
+.volume-slider::before {
+  content: "";
+  position: absolute;
+  /* Calcolo ancora più preciso basato sul thumb */
+  width: calc(100% - 28px); /* Sottrai la larghezza del thumb */
+  left: 14px; /* Metà della larghezza del thumb */
+  top: 50%;
+  transform: translateY(-50%);
+  height: 4px;
+  background: var(--slider-bg);
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Soluzione per rendere cliccabile solo il pallino dello slider */
+input[type=range] {
+  pointer-events: none; /* Disabilita eventi sulla barra */
+  background: transparent !important; /* Rende la barra trasparente */
+  z-index: 1; /* Assicura che lo slider sia sopra lo pseudo-elemento */
+  position: relative; /* Necessario per il z-index */
+  -webkit-appearance: none; /* Rimuove lo stile predefinito per maggiore controllo */
+  appearance: none;
+  height: 30px; /* Altezza aumentata per garantire spazio sufficiente */
+  margin: 0; /* Rimuove i margini che possono causare disallineamenti */
+  vertical-align: middle; /* Allineamento verticale */
+}
+
+/* Migliora l'allineamento verticale del thumb */
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  pointer-events: auto; /* Solo il pallino accetta eventi */
+  cursor: grab;
+  position: relative;
+  z-index: 3; /* Posiziona il thumb sopra la barra */
+  width: 18px; /* Valore esatto dai tuoi CSS originali */
+  height: 18px; /* Valore esatto dai tuoi CSS originali */
+  border-radius: 50%;
+  background: var(--slider-thumb);
+  margin-top: -7px; /* ESSENZIALE: Centra verticalmente il thumb rispetto alla barra */
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); /* Dall'originale */
+}
+
+input[type=range]::-moz-range-thumb {
+  pointer-events: auto;
+  cursor: grab;
+  position: relative;
+  z-index: 3;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--slider-thumb);
+  border: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition: all 0.15s ease;
+}
+
+/* Durante il trascinamento */
+input[type=range]::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.2);
+  background: var(--accent-color);
+}
+
+input[type=range]::-moz-range-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.2);
+  background: var(--accent-color);
+}
+
+/* Aggiunge il track personalizzato per la barra */
+input[type=range]::-webkit-slider-runnable-track {
+  -webkit-appearance: none;
+  height: 4px; /* Altezza della barra */
+  background: transparent; /* Trasparente perché usiamo lo pseudo-elemento */
+  border-radius: 2px;
+  cursor: default;
+}
+
+input[type=range]::-moz-range-track {
+  height: 4px;
+  background: transparent;
+  border-radius: 2px;
+  cursor: default;
+}
+
+/* Barra visiva dello slider che rispetta i limiti - versione migliorata */
+.volume-slider {
+  position: relative;
+  display: flex;
+  align-items: center; /* Centra verticalmente */
+  height: 30px; /* Altezza esplicita */
+}
+
+/* Barra visiva personalizzata con allineamento preciso */
+.volume-slider::before {
+  content: "";
+  position: absolute;
+  left: 9px; /* Regolabile in base al design */
+  right: 9px; /* Regolabile in base al design */
+  top: 50%; /* Centratura verticale */
+  transform: translateY(-50%); /* Centratura verticale */
+  height: 4px; /* Altezza della barra */
+  width: auto;
+  background: var(--slider-bg);
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Assicurati che il container dello slider abbia spazio sufficiente */
+.sound-item {
+  display: flex;
+  align-items: center; /* Centra tutti gli elementi verticalmente */
+}
+
+/* Assicurati che il container dello slider abbia una larghezza adeguata */
+.volume-slider {
+  flex: 1;
+  box-sizing: border-box;
+}
