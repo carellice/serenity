@@ -1629,3 +1629,261 @@ input[type=range]::-moz-range-track {
     0% { transform: scale(0.9); opacity: 0; }
     100% { transform: scale(1); opacity: 1; }
 }
+
+/* Stili per il modale del timer */
+.modal-content {
+    background-color: var(--dark-section-bg);
+    border-radius: 16px;
+    width: 90%;
+    max-width: 400px;
+    padding: 25px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header h3 {
+    font-size: 20px;
+    color: var(--dark-text);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-header i {
+    color: var(--accent-color);
+}
+
+.modal-header button {
+    background: transparent;
+    border: none;
+    color: var(--dark-secondary-text);
+    font-size: 20px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.modal-header button:hover {
+    color: var(--dark-text);
+}
+
+/* Opzioni del timer */
+.timer-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.timer-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.timer-option {
+    flex: 1;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: none;
+    color: var(--dark-text);
+    padding: 15px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.timer-option:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.timer-option:active {
+    transform: translateY(0);
+}
+
+.timer-option.active {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+/* Input personalizzato per il timer */
+.timer-custom {
+    margin-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 20px;
+}
+
+.timer-custom-input {
+    display: flex;
+    gap: 10px;
+}
+
+#custom-timer-minutes {
+    flex: 1;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 12px 15px;
+    color: var(--dark-text);
+    font-size: 16px;
+}
+
+#custom-timer-minutes:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+#set-custom-timer-btn {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+#set-custom-timer-btn:hover {
+    background-color: #0070e0;
+}
+
+/* Stato del timer */
+.timer-status {
+    margin-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 20px;
+}
+
+.timer-countdown {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    font-size: 24px;
+    color: var(--accent-color);
+}
+
+.timer-countdown i {
+    animation: pulse 2s infinite;
+}
+
+/* Stile specifico per il pulsante timer quando attivo */
+#timer-btn.active {
+    color: var(--accent-color);
+    animation: pulse 2s infinite;
+}
+
+/* Indicatore di timer attivo sulla icona */
+.timer-indicator {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--accent-color);
+    animation: pulse 2s infinite;
+    display: none;
+}
+
+#timer-btn.active .timer-indicator {
+    display: block;
+}
+
+/* Animazione per gli indicatori */
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Responsive per schermi piccoli */
+@media (max-width: 480px) {
+    .timer-option {
+        padding: 12px 8px;
+        font-size: 14px;
+    }
+    
+    .timer-countdown {
+        font-size: 20px;
+    }
+}
+
+/* Nuovo stile per i pulsanti di controllo senza sfondo tipo card */
+.control-button button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent; /* Rimuove il background */
+    border: none;
+    color: var(--dark-text);
+    padding: 15px;
+    width: 100px;
+    height: 100px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Rimuove lo sfondo all'hover */
+.control-button button:hover {
+    transform: translateY(-2px);
+    box-shadow: none; /* Rimuove l'ombra */
+    background-color: transparent; /* Mantiene lo sfondo trasparente anche all'hover */
+}
+
+/* Rimuove l'effetto di pressione */
+.control-button button:active {
+    transform: translateY(0);
+    box-shadow: none; /* Rimuove l'ombra */
+}
+
+/* Stile specifico per il pulsante stop */
+#stop-btn:hover {
+    color: #ff3b30; /* Mantiene solo il cambio di colore */
+}
+
+/* Animazione pulsazione per il pulsante stop quando attivo */
+#stop-btn.playing {
+    color: var(--accent-color);
+    animation: pulse 2s infinite;
+    background-color: transparent; /* Assicura che non ci sia sfondo */
+}
+
+/* Stile specifico per il pulsante timer quando attivo */
+#timer-btn.active {
+    color: var(--accent-color);
+    animation: pulse 2s infinite;
+    background-color: transparent; /* Assicura che non ci sia sfondo */
+}
+
+/* Stile specifico per il pulsante blocca quando attivo */
+#lock-btn.locked {
+    color: var(--accent-color);
+    background-color: transparent; /* Assicura che non ci sia sfondo */
+}
+
+/* Se necessario, mantieni il responsive design per schermi piccoli */
+@media (max-width: 480px) {
+    .control-button button {
+        width: 90px;
+        height: 90px;
+        padding: 12px;
+    }
+    
+    .control-button i {
+        font-size: 28px;
+    }
+}

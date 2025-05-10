@@ -750,6 +750,326 @@ document.addEventListener('DOMContentLoaded', function() {
                 unlockAudio();
             }
         }, {once: true});
+
+        //TIMER
+        // Variabili per il timer
+        let timerInterval;
+        let timerEndTime = null;
+
+        // Ottieni riferimenti agli elementi del timer
+        const timerBtn = document.getElementById('timer-btn');
+        const timerModal = document.getElementById('timer-modal');
+        const closeTimerModalBtn = document.getElementById('close-timer-modal-btn');
+        const timerOptions = document.querySelectorAll('.timer-option');
+        const customTimerMinutes = document.getElementById('custom-timer-minutes');
+        const setCustomTimerBtn = document.getElementById('set-custom-timer-btn');
+        const timerStatus = document.getElementById('timer-status');
+        const timerCountdownText = document.getElementById('timer-countdown-text');
+
+        // Apertura del modale del timer
+        timerBtn.addEventListener('click', function() {
+            if (screenLocked) return; // Non fare nulla se lo schermo è bloccato
+            
+            // Mostra il modale
+            timerModal.classList.remove('hidden');
+            
+            // Aggiorna la UI del modale con lo stato attuale del timer
+            updateTimerModalUI();
+        });
+
+        // Chiusura del modale del timer
+        closeTimerModalBtn.addEventListener('click', function() {
+            timerModal.classList.add('hidden');
+        });
+
+        // Chiudi il modale quando si fa click fuori dal contenuto
+        timerModal.addEventListener('click', function(event) {
+            if (event.target === timerModal) {
+                timerModal.classList.add('hidden');
+            }
+        });
+
+        // Gestione dei pulsanti del timer predefiniti
+        timerOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                const minutes = parseInt(this.dataset.minutes);
+                
+                // Rimuovi la classe active da tutti i pulsanti
+                timerOptions.forEach(opt => opt.classList.remove('active'));
+                
+                if (minutes === 0) {
+                    // Disattivazione del timer
+                    clearTimer();
+                    this.classList.add('active');
+                } else {
+                    // Attivazione di un nuovo timer
+                    startTimer(minutes);
+                    this.classList.add('active');
+                }
+                
+                // Aggiorna l'interfaccia
+                updateTimerModalUI();
+            });
+        });
+
+        // Gestione del timer personalizzato
+        setCustomTimerBtn.addEventListener('click', function() {
+            const minutes = parseInt(customTimerMinutes.value);
+            
+            if (isNaN(minutes) || minutes <= 0 || minutes > 720) {
+                // Mostra feedback visivo di errore
+                customTimerMinutes.style.borderColor = 'red';
+                setTimeout(() => {
+                    customTimerMinutes.style.borderColor = '';
+                }, 1500);
+                return;
+            }
+            
+            // Rimuovi la classe active da tutti i pulsanti predefiniti
+            timerOptions.forEach(opt => opt.classList.remove('active'));
+            
+            // Avvia il timer personalizzato
+            startTimer(minutes);
+            
+            // Aggiorna l'interfaccia
+            updateTimerModalUI();
+            
+            // Pulisci l'input
+            customTimerMinutes.value = '';
+        });
+
+        // Avvia un nuovo timer
+        function startTimer(minutes) {
+            // Pulisci eventuali timer esistenti
+            clearInterval(timerInterval);
+            
+            // Calcola quando il timer deve scadere
+            const now = new Date();
+            timerEndTime = new Date(now.getTime() + minutes * 60000);
+            
+            // Aggiorna l'indicatore di timer attivo
+            timerBtn.classList.add('active');
+            
+            // Mostra lo stato del timer nel modale
+            updateTimerCountdown();
+            timerStatus.classList.remove('hidden');
+            
+            // Avvia l'intervallo per aggiornare il countdown
+            timerInterval = setInterval(function() {
+                if (updateTimerCountdown()) {
+                    // Il timer è scaduto
+                    timerExpired();
+                }
+            }, 1000);
+            
+            console.log(`Timer impostato per ${minutes} minuti`);
+        }
+
+        // Aggiorna il countdown visualizzato
+        function updateTimerCountdown() {
+            if (!timerEndTime) return false;
+            
+            const now = new Date();
+            const timeLeft = timerEndTime - now;
+            
+            if (timeLeft <= 0) {
+                // Il timer è scaduto
+                timerCountdownText.textContent = "00:00:00";
+                return true;
+            }
+            
+            // Calcola ore, minuti e secondi rimanenti
+            const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+            
+            // Formatta il testo del countdown
+            const formattedHours = String(hours).padStart(2, '0');
+            const formattedMinutes = String(minutes).padStart(2, '0');
+            const formattedSeconds = String(seconds).padStart(2, '0');
+            
+            timerCountdownText.textContent = `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+            
+            return false;
+        }
+
+        // Gestione della scadenza del timer
+        function timerExpired() {
+            // Ferma tutti i suoni
+            stopAllSounds();
+            
+            // Pulisci il timer
+            clearTimer();
+            
+            // Mostra una notifica che il timer è scaduto
+            showTimerExpiredNotification();
+            
+            console.log('Timer scaduto: tutti i suoni sono stati fermati');
+        }
+
+        // Pulisci il timer
+        function clearTimer() {
+            clearInterval(timerInterval);
+            timerEndTime = null;
+            timerBtn.classList.remove('active');
+            timerStatus.classList.add('hidden');
+            
+            // Deseleziona tutte le opzioni tranne "Disattiva"
+            timerOptions.forEach(opt => {
+                if (opt.dataset.minutes !== '0') {
+                    opt.classList.remove('active');
+                }
+            });
+            
+            console.log('Timer disattivato');
+        }
+
+        // Aggiorna l'interfaccia del modale del timer
+        function updateTimerModalUI() {
+            // Nascondi lo stato se non c'è un timer attivo
+            if (!timerEndTime) {
+                timerStatus.classList.add('hidden');
+                
+                // Attiva solo il pulsante "Disattiva"
+                timerOptions.forEach(opt => {
+                    if (opt.dataset.minutes === '0') {
+                        opt.classList.add('active');
+                    } else {
+                        opt.classList.remove('active');
+                    }
+                });
+            } else {
+                // Mostra lo stato del timer
+                updateTimerCountdown();
+                timerStatus.classList.remove('hidden');
+                
+                // Nessun pulsante attivo, poiché il timer potrebbe essere personalizzato
+                timerOptions.forEach(opt => opt.classList.remove('active'));
+            }
+        }
+
+        // Mostra una notifica quando il timer è scaduto
+        function showTimerExpiredNotification() {
+            // Crea l'elemento di notifica
+            const notification = document.createElement('div');
+            notification.className = 'timer-expired-notification';
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <i class="fas fa-clock"></i>
+                    <p>Timer scaduto! I suoni sono stati fermati.</p>
+                </div>
+            `;
+            
+            // Aggiungi la notifica al DOM
+            document.body.appendChild(notification);
+            
+            // Mostra la notifica con animazione
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
+            // Nascondi e rimuovi la notifica dopo alcuni secondi
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 4000);
+        }
+
+        // Stili CSS aggiuntivi per la notifica
+        const timerExpiredStyle = document.createElement('style');
+        timerExpiredStyle.textContent = `
+        .timer-expired-notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(10, 132, 255, 0.9);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .timer-expired-notification.show {
+            opacity: 1;
+        }
+
+        .notification-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .notification-content i {
+            font-size: 20px;
+        }
+
+        .notification-content p {
+            font-size: 16px;
+            font-weight: 500;
+            margin: 0;
+        }
+        `;
+        document.head.appendChild(timerExpiredStyle);
+
+        // Verifica e ripristina il timer se necessario al caricamento della pagina
+        function checkForActiveTimer() {
+            // Verifica se c'è un timer salvato nel localStorage
+            const savedTimer = localStorage.getItem('serenityTimer');
+            
+            if (savedTimer) {
+                const timerData = JSON.parse(savedTimer);
+                const now = new Date();
+                const endTime = new Date(timerData.endTime);
+                
+                // Se il timer non è ancora scaduto
+                if (endTime > now) {
+                    // Ripristina il timer
+                    timerEndTime = endTime;
+                    timerBtn.classList.add('active');
+                    
+                    // Avvia l'intervallo per aggiornare il countdown
+                    timerInterval = setInterval(function() {
+                        if (updateTimerCountdown()) {
+                            // Il timer è scaduto
+                            timerExpired();
+                        }
+                    }, 1000);
+                    
+                    console.log('Timer ripristinato dal localStorage');
+                } else {
+                    // Il timer è già scaduto, rimuovilo dal localStorage
+                    localStorage.removeItem('serenityTimer');
+                }
+            }
+        }
+
+        // Salva il timer nel localStorage quando viene modificato
+        function saveTimerToLocalStorage() {
+            if (timerEndTime) {
+                const timerData = {
+                    endTime: timerEndTime.toISOString()
+                };
+                localStorage.setItem('serenityTimer', JSON.stringify(timerData));
+            } else {
+                localStorage.removeItem('serenityTimer');
+            }
+        }
+
+        // Aggiungi listener per salvare il timer
+        window.addEventListener('beforeunload', saveTimerToLocalStorage);
+
+        // Controlla se c'è un timer attivo al caricamento della pagina
+        document.addEventListener('DOMContentLoaded', function() {
+            // La funzione viene chiamata dopo che gli slider sono stati inizializzati
+            setTimeout(checkForActiveTimer, 2000);
+        });
     }
 
     // Messaggio di debug
