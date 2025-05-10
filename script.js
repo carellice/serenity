@@ -433,87 +433,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Inizializza gli slider
     function initializeSliders() {
         // Variabili necessarie per il timer e altre funzionalità
-        let timerInterval;
-        let remainingTime = 0;
         let screenLocked = false;
         let moveMessageInterval;
         let anyPlaying = false;
-
-        // Gestione migliorata del timer
-        const timerBtn = document.getElementById('timer-btn');
-        const timerModal = document.getElementById('timer-modal');
-        const timerOptions = document.querySelectorAll('.timer-options button');
-        const timerStatus = document.getElementById('timer-status');
-        
-        // Mostra/nascondi modale timer
-        timerBtn.addEventListener('click', function(event) {
-            event.stopPropagation();
-            timerModal.classList.toggle('hidden');
-        });
-
-        // Previeni propagazione eventi dai pulsanti timer
-        timerOptions.forEach(button => {
-            button.addEventListener('click', function(event) {
-                event.stopPropagation();
-            });
-        });
-
-        // Chiudi modale timer quando si fa click fuori
-        document.addEventListener('click', function(event) {
-            if (!timerModal.classList.contains('hidden')) {
-                if (!timerModal.contains(event.target) && event.target !== timerBtn) {
-                    timerModal.classList.add('hidden');
-                }
-            }
-        });
-
-        // Gestione delle opzioni timer
-        timerOptions.forEach(option => {
-            option.addEventListener('click', function(event) {
-                event.stopPropagation();
-                
-                const minutes = parseInt(this.dataset.time);
-                console.log(`Timer impostato per ${minutes} minuti`);
-                
-                // Reset stato attivo
-                timerOptions.forEach(btn => btn.classList.remove('active'));
-                this.classList.add('active');
-                
-                // Cancella timer esistente
-                clearInterval(timerInterval);
-                
-                if (minutes === 0) {
-                    remainingTime = 0;
-                    timerStatus.textContent = "Nessun timer impostato";
-                } else {
-                    remainingTime = minutes * 60;
-                    updateTimerDisplay();
-                    
-                    timerInterval = setInterval(function() {
-                        remainingTime--;
-                        updateTimerDisplay();
-                        
-                        if (remainingTime <= 0) {
-                            stopAllSounds();
-                            clearInterval(timerInterval);
-                            timerStatus.textContent = "Timer scaduto";
-                            timerOptions.forEach(btn => btn.classList.remove('active'));
-                        }
-                    }, 1000);
-                }
-                
-                setTimeout(function() {
-                    timerModal.classList.add('hidden');
-                }, 300);
-            });
-        });
-
-        // Aggiorna display timer
-        function updateTimerDisplay() {
-            const minutes = Math.floor(remainingTime / 60);
-            const seconds = remainingTime % 60;
-            timerStatus.textContent = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
-        }
 
         // Ferma tutti i suoni
         function stopAllSounds() {
