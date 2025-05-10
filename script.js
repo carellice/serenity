@@ -531,7 +531,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Aggiorna anche il testo
             const lockText = document.querySelector('#lock-btn span');
-            lockText.textContent = 'Bloccato';
+            lockText.textContent = 'Blocca';
             
             // Aggiungi la classe locked
             document.getElementById('lock-btn').classList.add('locked');
