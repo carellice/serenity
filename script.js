@@ -524,12 +524,18 @@ document.addEventListener('DOMContentLoaded', function() {
         // Funzione per bloccare lo schermo
         function lockScreen() {
             screenLocked = true;
-            lockBtn.innerHTML = '<i class="fas fa-lock"></i>';
-            lockBtn.classList.add('locked');
-            screenLockOverlay.classList.add('active');
             
-            // Disabilita il pulsante timer
-            if (timerBtn) timerBtn.disabled = true;
+            // Modifica solo l'icona, non l'intero contenuto del pulsante
+            const lockIcon = document.querySelector('#lock-btn i');
+            lockIcon.className = 'fas fa-lock';
+            
+            // Aggiorna anche il testo
+            const lockText = document.querySelector('#lock-btn span');
+            lockText.textContent = 'Bloccato';
+            
+            // Aggiungi la classe locked
+            document.getElementById('lock-btn').classList.add('locked');
+            screenLockOverlay.classList.add('active');
             
             // Inizia a muovere il pulsante di sblocco per evitare burn-in
             moveUnlockButton();
@@ -538,12 +544,14 @@ document.addEventListener('DOMContentLoaded', function() {
         // Funzione per sbloccare lo schermo
         function unlockScreen() {
             screenLocked = false;
-            lockBtn.innerHTML = '<i class="fas fa-lock-open"></i>';
-            lockBtn.classList.remove('locked');
-            screenLockOverlay.classList.remove('active');
             
-            // Riabilita il pulsante timer
-            if (timerBtn) timerBtn.disabled = false;
+            // Modifica solo l'icona, non l'intero contenuto del pulsante
+            const lockIcon = document.querySelector('#lock-btn i');
+            lockIcon.className = 'fas fa-lock-open';
+            
+            // Rimuovi la classe locked
+            document.getElementById('lock-btn').classList.remove('locked');
+            screenLockOverlay.classList.remove('active');
             
             // Ferma il movimento del pulsante
             clearInterval(moveMessageInterval);
