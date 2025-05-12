@@ -8,164 +8,157 @@
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="icon.png" type="image/x-icon">
     <link rel="shortcut icon" href="icon.png" type="image/x-icon">
+
+    <!-- Metadati per PWA -->
+    <meta name="theme-color" content="#121212">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Serenity">
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Icone per iOS -->
+    <link rel="apple-touch-icon" href="icons/apple-icon-120x120.png" sizes="120x120">
+    <link rel="apple-touch-icon" href="icons/apple-icon-152x152.png" sizes="152x152">
+    <link rel="apple-touch-icon" href="icons/apple-icon-167x167.png" sizes="167x167">
+    <link rel="apple-touch-icon" href="icons/apple-icon-180x180.png" sizes="180x180">
+
+    <!-- Splash screen per iOS -->
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-2048-2732.png" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-1668-2388.png" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-1536-2048.png" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-1125-2436.png" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-1242-2688.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-828-1792.png" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
+    <link rel="apple-touch-startup-image" href="icons/apple-splash-640-1136.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)">
 </head>
 <body class="dark-theme">
     <div class="container">
         <header>
             <h1>Serenity</h1>
-            <div class="controls-container">
-                <div class="timer-container">
-                    <button id="timer-btn"><i class="fas fa-clock"></i></button>
-                    <div id="timer-modal" class="hidden">
-                        <h3>Sleep Timer</h3>
-                        <div class="timer-options">
-                            <button data-time="5">5 min</button>
-                            <button data-time="15">15 min</button>
-                            <button data-time="30">30 min</button>
-                            <button data-time="60">1 hour</button>
-                            <button data-time="0">Off</button>
-                        </div>
-                        <p id="timer-status">No timer set</p>
-                    </div>
-                </div>
-                <div class="stop-container">
-                    <button id="stop-btn"><i class="fas fa-stop"></i></button>
-                </div>
-                <div class="lock-container">
-                    <button id="lock-btn"><i class="fas fa-lock-open"></i></button>
-                </div>
-            </div>
         </header>
+       <section class="main-controls">
+            <div class="control-button">
+                <button id="stop-btn"><i class="fas fa-stop"></i><span>Stop</span></button>
+            </div>
+            <div class="control-button">
+                <button id="timer-btn"><i class="fas fa-clock"></i><span>Timer</span></button>
+            </div>
+            <div class="control-button">
+                <button id="lock-btn"><i class="fas fa-lock-open"></i><span>Blocca</span></button>
+            </div>
+        </section>
 
         <section class="sound-category">
-            <h2>Anti Sound</h2>
-            <div class="sound-item">
-                <div class="sound-info">
-                    <i class="fas fa-wave-square"></i>
-                    <span>White Noise</span>
+            <h2>Anti Suoni</h2>
+            <div class="sound-items-grid">
+                <div class="sound-item-card" data-sound="white-noise.mp3">
+                    <div class="sound-icon">
+                        <i class="fas fa-wave-square"></i>
+                    </div>
+                    <div class="sound-label">Rumore Bianco</div>
+                    <div class="sound-indicator"></div>
                 </div>
-                <div class="volume-slider">
-                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="white-noise.mp3">
+                <div class="sound-item-card" data-sound="brown-noise.mp3">
+                    <div class="sound-icon">
+                        <i class="fas fa-wave-square"></i>
+                    </div>
+                    <div class="sound-label">Rumore Marrone</div>
+                    <div class="sound-indicator"></div>
                 </div>
-            </div>
-            <div class="sound-item">
-                <div class="sound-info">
-                    <i class="fas fa-wave-square"></i>
-                    <span>Brown Noise</span>
-                </div>
-                <div class="volume-slider">
-                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="brown-noise.mp3">
-                </div>
-            </div>
-            <div class="sound-item">
-                <div class="sound-info">
-                    <i class="fas fa-wave-square"></i>
-                    <span>Pink Noise</span>
-                </div>
-                <div class="volume-slider">
-                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="pink-noise.mp3">
+                <div class="sound-item-card" data-sound="pink-noise.mp3">
+                    <div class="sound-icon">
+                        <i class="fas fa-wave-square"></i>
+                    </div>
+                    <div class="sound-label">Rumore Rosa</div>
+                    <div class="sound-indicator"></div>
                 </div>
             </div>
         </section>
 
         <section class="sound-category">
-            <h2>Nature</h2>
-            <div class="sound-item">
-                <div class="sound-info">
-                    <i class="fas fa-cloud-rain"></i>
-                    <span>Rain</span>
+            <h2>Natura</h2>
+            <div class="sound-items-grid">
+                <div class="sound-item-card" data-sound="rain.wav">
+                    <div class="sound-icon">
+                        <i class="fas fa-cloud-rain"></i>
+                    </div>
+                    <div class="sound-label">Pioggia</div>
+                    <div class="sound-indicator"></div>
                 </div>
-                <div class="volume-slider">
-                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="rain.wav">
+                <div class="sound-item-card" data-sound="storm.mp3">
+                    <div class="sound-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div class="sound-label">Tempesta</div>
+                    <div class="sound-indicator"></div>
                 </div>
-            </div>
-            <div class="sound-item">
-                <div class="sound-info">
-                    <i class="fas fa-bolt"></i>
-                    <span>Storm</span>
+                <div class="sound-item-card" data-sound="wind.mp3">
+                    <div class="sound-icon">
+                        <i class="fas fa-wind"></i>
+                    </div>
+                    <div class="sound-label">Vento</div>
+                    <div class="sound-indicator"></div>
                 </div>
-                <div class="volume-slider">
-                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="storm.mp3">
+                <div class="sound-item-card" data-sound="stream.mp3">
+                    <div class="sound-icon">
+                        <i class="fas fa-water"></i>
+                    </div>
+                    <div class="sound-label">Torrente</div>
+                    <div class="sound-indicator"></div>
                 </div>
-            </div>
-            <div class="sound-item">
-                <div class="sound-info">
-                    <i class="fas fa-wind"></i>
-                    <span>Wind</span>
+                <div class="sound-item-card" data-sound="birds.mp3">
+                    <div class="sound-icon">
+                        <i class="fas fa-dove"></i>
+                    </div>
+                    <div class="sound-label">Uccelli</div>
+                    <div class="sound-indicator"></div>
                 </div>
-                <div class="volume-slider">
-                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="wind.mp3">
-                </div>
-            </div>
-            <div class="sound-item">
-                <div class="sound-info">
-                    <i class="fas fa-water"></i>
-                    <span>Stream</span>
-                </div>
-                <div class="volume-slider">
-                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="stream.mp3">
-                </div>
-            </div>
-            <div class="sound-item">
-                <div class="sound-info">
-                    <i class="fas fa-dove"></i>
-                    <span>Birds</span>
-                </div>
-                <div class="volume-slider">
-                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="birds.mp3">
-                </div>
-            </div>
-            <div class="sound-item">
-                <div class="sound-info">
-                    <i class="fas fa-water"></i>
-                    <span>Waves</span>
-                </div>
-                <div class="volume-slider">
-                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="waves.mp3">
+                <div class="sound-item-card" data-sound="waves.mp3">
+                    <div class="sound-icon">
+                        <i class="fas fa-water"></i>
+                    </div>
+                    <div class="sound-label">Onde</div>
+                    <div class="sound-indicator"></div>
                 </div>
             </div>
         </section>
 
         <section class="sound-category">
-            <h2>Travel</h2>
-            <div class="sound-item">
-                <div class="sound-info">
-                    <i class="fas fa-ship"></i>
-                    <span>Boat</span>
+            <h2>Viaggio</h2>
+            <div class="sound-items-grid">
+                <div class="sound-item-card" data-sound="boat.mp3">
+                    <div class="sound-icon">
+                        <i class="fas fa-ship"></i>
+                    </div>
+                    <div class="sound-label">Barca</div>
+                    <div class="sound-indicator"></div>
                 </div>
-                <div class="volume-slider">
-                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="boat.mp3">
-                </div>
-            </div>
-            <div class="sound-item">
-                <div class="sound-info">
-                    <i class="fas fa-city"></i>
-                    <span>City</span>
-                </div>
-                <div class="volume-slider">
-                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="city.mp3">
+                <div class="sound-item-card" data-sound="city.mp3">
+                    <div class="sound-icon">
+                        <i class="fas fa-city"></i>
+                    </div>
+                    <div class="sound-label">Città</div>
+                    <div class="sound-indicator"></div>
                 </div>
             </div>
         </section>
 
         <section class="sound-category">
-            <h2>Interiors</h2>
-            <div class="sound-item">
-                <div class="sound-info">
-                    <i class="fas fa-fire"></i>
-                    <span>Fireplace</span>
+            <h2>Altro</h2>
+            <div class="sound-items-grid">
+                <div class="sound-item-card" data-sound="fireplace.mp3">
+                    <div class="sound-icon">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <div class="sound-label">Falò</div>
+                    <div class="sound-indicator"></div>
                 </div>
-                <div class="volume-slider">
-                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="fireplace.mp3">
-                </div>
-            </div>
-            <div class="sound-item">
-                <div class="sound-info">
-                    <i class="fas fa-temperature-full"></i>
-                    <span>Hair Dryer</span>
-                </div>
-                <div class="volume-slider">
-                    <input type="range" min="0" max="100" value="0" class="slider" data-sound="hair-dryer.mp3">
+                <div class="sound-item-card" data-sound="hair-dryer.mp3">
+                    <div class="sound-icon">
+                        <i class="fas fa-temperature-full"></i>
+                    </div>
+                    <div class="sound-label">Asciugacapelli</div>
+                    <div class="sound-indicator"></div>
                 </div>
             </div>
         </section>
@@ -174,6 +167,61 @@
     <footer>
         <p>© 2025 Serenity - Relaxing Sounds</p>
     </footer>
+
+    <!-- Modal per lo slider del volume -->
+    <div id="volume-modal" class="volume-modal hidden">
+        <div class="volume-modal-content">
+            <div class="volume-modal-header">
+                <div class="sound-info-modal">
+                    <i id="modal-icon" class="fas"></i>
+                    <span id="modal-title">Sound Title</span>
+                </div>
+                <button id="close-modal-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="volume-slider-container">
+                <input type="range" min="0" max="100" value="0" class="slider" id="modal-slider">
+                <div class="volume-value">
+                    <span id="volume-percentage">0%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aggiunta del modale per il timer -->
+    <div id="timer-modal" class="modal-overlay hidden">
+        <div class="modal-content volume-modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-clock"></i> Imposta Timer</h3>
+                <button id="close-timer-modal-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="timer-options">
+                <div class="timer-row">
+                    <button class="timer-option" data-minutes="5">5 minuti</button>
+                    <button class="timer-option" data-minutes="15">15 minuti</button>
+                </div>
+                <div class="timer-row">
+                    <button class="timer-option" data-minutes="30">30 minuti</button>
+                    <button class="timer-option" data-minutes="60">1 ora</button>
+                </div>
+                <div class="timer-row">
+                    <button class="timer-option" data-minutes="120">2 ore</button>
+                    <button class="timer-option" data-minutes="0">Disattiva</button>
+                </div>
+            </div>
+            <div class="timer-custom">
+                <div class="timer-custom-input">
+                    <input type="number" id="custom-timer-minutes" min="1" max="720" placeholder="Minuti personalizzati">
+                    <button id="set-custom-timer-btn">Imposta</button>
+                </div>
+            </div>
+            <div id="timer-status" class="timer-status hidden">
+                <div class="timer-countdown">
+                    <i class="fas fa-hourglass-half"></i>
+                    <span id="timer-countdown-text">00:00:00</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Overlay per il blocco schermo -->
     <div class="screen-lock-overlay">
@@ -191,6 +239,20 @@
             <p>Schermo bloccato</p>
             <button class="unlock-btn">Sblocca</button>
         </div>
+    </div>
+
+    <!-- Pulsante di installazione -->
+    <div class="install-container" id="install-container">
+        <button class="install-btn" id="install-btn">
+            <i class="fas fa-download"></i>
+            Installa App
+        </button>
+    </div>
+
+    <!-- Banner di installazione completata -->
+    <div class="install-success" id="install-success">
+        <i class="fas fa-check-circle"></i>
+        <span>App installata con successo!</span>
     </div>
 
     <script src="script.js"></script>

@@ -432,210 +432,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Inizializza gli slider
     function initializeSliders() {
-        const sliders = document.querySelectorAll('.slider');
-        
-        // Funzione comune per gestire i cambiamenti di volume
-        function handleVolumeChange(slider) {
-            const soundId = slider.dataset.sound;
-            const volume = slider.value / 100;
-            
-            if (isIOS) {
-                playIOSSoundWithWebAudio(soundId, volume);
-            } else {
-                playStandardSound(soundId, volume);
-            }
-        }
-        
-        // Aggiungi event listener a tutti gli slider
-        sliders.forEach(slider => {
-            // Per iOS, aggiungi un evento di click diretto che farà sbloccare l'audio
-            if (isIOS) {
-                slider.addEventListener('click', function(e) {
-                    // Sblocca l'audio al primo click
-                    if (!audioUnlocked) {
-                        unlockAudio();
-                    }
-                    
-                    // Calcola la posizione relativa del click
-                    const rect = this.getBoundingClientRect();
-                    const clickPosition = e.clientX - rect.left;
-                    const newValue = Math.round((clickPosition / rect.width) * 100);
-                    
-                    // Limita il valore tra 0 e 100
-                    this.value = Math.max(0, Math.min(100, newValue));
-                    handleVolumeChange(this);
-                });
-            }
-            
-            // Evento principale per i cambiamenti di input
-            slider.addEventListener('input', function() {
-                handleVolumeChange(this);
-            });
-            
-            // Altri eventi standard
-            slider.addEventListener('change', function() {
-                handleVolumeChange(this);
-            });
-            
-            slider.addEventListener('touchend', function() {
-                handleVolumeChange(this);
-            });
-            
-            // Sblocco audio al primo touch
-            slider.addEventListener('touchstart', function() {
-                if (!audioUnlocked) {
-                    unlockAudio();
-                }
-            });
-            
-            // Per iOS, touch events specifici
-            if (isIOS) {
-                slider.addEventListener('touchmove', function(e) {
-                    // Calcola la posizione relativa del touch
-                    const rect = this.getBoundingClientRect();
-                    const touchPosition = e.touches[0].clientX - rect.left;
-                    const newValue = Math.round((touchPosition / rect.width) * 100);
-                    
-                    // Limita il valore tra 0 e 100
-                    this.value = Math.max(0, Math.min(100, newValue));
-                    handleVolumeChange(this);
-                    
-                    // Previeni lo scroll
-                    e.preventDefault();
-                });
-                
-                // Overlay migliorato per iOS
-                const soundItem = slider.closest('.sound-item');
-                if (soundItem) {
-                    const sliderContainer = slider.closest('.volume-slider');
-                    if (sliderContainer) {
-                        const overlay = document.createElement('div');
-                        overlay.className = 'ios-slider-overlay';
-                        
-                        // Posiziona l'overlay
-                        sliderContainer.style.position = 'relative';
-                        
-                        // Eventi touch dell'overlay
-                        overlay.addEventListener('touchstart', function(e) {
-                            // Sblocca audio se necessario
-                            if (!audioUnlocked) {
-                                unlockAudio();
-                            }
-                            
-                            // Calcola posizione
-                            const rect = slider.getBoundingClientRect();
-                            const touchX = e.touches[0].clientX - rect.left;
-                            const percent = Math.max(0, Math.min(1, touchX / rect.width));
-                            
-                            // Imposta valore
-                            slider.value = Math.round(percent * 100);
-                            handleVolumeChange(slider);
-                            
-                            e.preventDefault();
-                        });
-                        
-                        overlay.addEventListener('touchmove', function(e) {
-                            const rect = slider.getBoundingClientRect();
-                            const touchX = e.touches[0].clientX - rect.left;
-                            const percent = Math.max(0, Math.min(1, touchX / rect.width));
-                            
-                            slider.value = Math.round(percent * 100);
-                            handleVolumeChange(slider);
-                            
-                            e.preventDefault();
-                        });
-                        
-                        // Aggiungi l'overlay
-                        sliderContainer.appendChild(overlay);
-                    }
-                }
-            }
-        });
-
-        // Sblocco globale al primo tocco
-        document.addEventListener('touchstart', function() {
-            if (!audioUnlocked) {
-                unlockAudio();
-            }
-        }, {once: true});
-
-        // Gestione migliorata del timer
-        const timerBtn = document.getElementById('timer-btn');
-        const timerModal = document.getElementById('timer-modal');
-        const timerOptions = document.querySelectorAll('.timer-options button');
-        const timerStatus = document.getElementById('timer-status');
-        let timerInterval;
-        let remainingTime = 0;
-
-        // Mostra/nascondi modale timer
-        timerBtn.addEventListener('click', function(event) {
-            event.stopPropagation();
-            timerModal.classList.toggle('hidden');
-        });
-
-        // Previeni propagazione eventi dai pulsanti timer
-        timerOptions.forEach(button => {
-            button.addEventListener('click', function(event) {
-                event.stopPropagation();
-            });
-        });
-
-        // Chiudi modale timer quando si fa click fuori
-        document.addEventListener('click', function(event) {
-            if (!timerModal.classList.contains('hidden')) {
-                if (!timerModal.contains(event.target) && event.target !== timerBtn) {
-                    timerModal.classList.add('hidden');
-                }
-            }
-        });
-
-        // Gestione delle opzioni timer
-        timerOptions.forEach(option => {
-            option.addEventListener('click', function(event) {
-                event.stopPropagation();
-                
-                const minutes = parseInt(this.dataset.time);
-                console.log(`Timer impostato per ${minutes} minuti`);
-                
-                // Reset stato attivo
-                timerOptions.forEach(btn => btn.classList.remove('active'));
-                this.classList.add('active');
-                
-                // Cancella timer esistente
-                clearInterval(timerInterval);
-                
-                if (minutes === 0) {
-                    remainingTime = 0;
-                    timerStatus.textContent = "Nessun timer impostato";
-                } else {
-                    remainingTime = minutes * 60;
-                    updateTimerDisplay();
-                    
-                    timerInterval = setInterval(function() {
-                        remainingTime--;
-                        updateTimerDisplay();
-                        
-                        if (remainingTime <= 0) {
-                            stopAllSounds();
-                            clearInterval(timerInterval);
-                            timerStatus.textContent = "Timer scaduto";
-                            timerOptions.forEach(btn => btn.classList.remove('active'));
-                        }
-                    }, 1000);
-                }
-                
-                setTimeout(function() {
-                    timerModal.classList.add('hidden');
-                }, 300);
-            });
-        });
-
-        // Aggiorna display timer
-        function updateTimerDisplay() {
-            const minutes = Math.floor(remainingTime / 60);
-            const seconds = remainingTime % 60;
-            timerStatus.textContent = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
-        }
+        // Variabili necessarie per il timer e altre funzionalità
+        let screenLocked = false;
+        let moveMessageInterval;
+        let anyPlaying = false;
 
         // Ferma tutti i suoni
         function stopAllSounds() {
@@ -669,15 +469,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
-            // Reset sliders
-            sliders.forEach(slider => {
-                slider.value = 0;
+            // Aggiorna lo stato del pulsante e le card (implementato più avanti)
+            updateStopButtonState(false);
+            
+            // Rimuovi la classe active da tutte le card dei suoni
+            const soundCards = document.querySelectorAll('.sound-item-card');
+            soundCards.forEach(card => {
+                card.classList.remove('active');
             });
         }
 
         // Gestione del pulsante di stop
         const stopBtn = document.getElementById('stop-btn');
-        let anyPlaying = false; // Flag per tracciare se c'è almeno un suono in riproduzione
 
         // Aggiungi l'event listener al pulsante stop
         stopBtn.addEventListener('click', function() {
@@ -696,68 +499,43 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        // Funzione comune per gestire i cambiamenti di volume
-        function handleVolumeChange(slider) {
-            const soundId = slider.dataset.sound;
-            const volume = slider.value / 100;
-            
-            if (isIOS) {
-                playIOSSoundWithWebAudio(soundId, volume);
-            } else {
-                playStandardSound(soundId, volume);
-            }
-            
-            // Controlla se almeno un suono è attivo
-            checkActiveSounds();
-        }
-
         // Funzione per verificare se ci sono suoni attivi
         function checkActiveSounds() {
             let hasActiveSounds = false;
             
-            // Verifica tutti gli slider
-            sliders.forEach(slider => {
-                if (parseInt(slider.value) > 0) {
+            // Verifica tutti i suoni
+            for (const soundId in sounds) {
+                if (sounds[soundId] && sounds[soundId].volume > 0) {
                     hasActiveSounds = true;
+                    break;
                 }
-            });
+            }
             
             // Aggiorna lo stato del pulsante stop
             updateStopButtonState(hasActiveSounds);
         }
-
-        // Aggiorna la funzione stopAllSounds per chiamare anche updateStopButtonState
-        const originalStopAllSounds = stopAllSounds;
-        stopAllSounds = function() {
-            originalStopAllSounds();
-            updateStopButtonState(false);
-        };
-
-        // Esegui un controllo iniziale dei suoni attivi
-        setTimeout(checkActiveSounds, 1000);
 
         // Gestione del blocco schermo
         const lockBtn = document.getElementById('lock-btn');
         const screenLockOverlay = document.querySelector('.screen-lock-overlay');
         const lockMessage = document.querySelector('.lock-message');
         const unlockBtn = document.querySelector('.unlock-btn');
-        let screenLocked = false;
-        let moveMessageInterval;
 
         // Funzione per bloccare lo schermo
         function lockScreen() {
             screenLocked = true;
-            lockBtn.innerHTML = '<i class="fas fa-lock"></i>';
-            lockBtn.classList.add('locked');
+            
+            // Modifica solo l'icona, non l'intero contenuto del pulsante
+            const lockIcon = document.querySelector('#lock-btn i');
+            lockIcon.className = 'fas fa-lock';
+            
+            // Aggiorna anche il testo
+            const lockText = document.querySelector('#lock-btn span');
+            lockText.textContent = 'Blocca';
+            
+            // Aggiungi la classe locked
+            document.getElementById('lock-btn').classList.add('locked');
             screenLockOverlay.classList.add('active');
-            
-            // Disabilita tutti gli slider
-            sliders.forEach(slider => {
-                slider.disabled = true;
-            });
-            
-            // Disabilita anche il pulsante timer
-            if (timerBtn) timerBtn.disabled = true;
             
             // Inizia a muovere il pulsante di sblocco per evitare burn-in
             moveUnlockButton();
@@ -766,17 +544,14 @@ document.addEventListener('DOMContentLoaded', function() {
         // Funzione per sbloccare lo schermo
         function unlockScreen() {
             screenLocked = false;
-            lockBtn.innerHTML = '<i class="fas fa-lock-open"></i>';
-            lockBtn.classList.remove('locked');
+            
+            // Modifica solo l'icona, non l'intero contenuto del pulsante
+            const lockIcon = document.querySelector('#lock-btn i');
+            lockIcon.className = 'fas fa-lock-open';
+            
+            // Rimuovi la classe locked
+            document.getElementById('lock-btn').classList.remove('locked');
             screenLockOverlay.classList.remove('active');
-            
-            // Abilita tutti gli slider
-            sliders.forEach(slider => {
-                slider.disabled = false;
-            });
-            
-            // Riabilita il pulsante timer
-            if (timerBtn) timerBtn.disabled = false;
             
             // Ferma il movimento del pulsante
             clearInterval(moveMessageInterval);
@@ -857,8 +632,680 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Attiva Wake Lock all'avvio dell'app
         requestWakeLock();
+        
+        // NUOVA FUNZIONALITÀ: Setup del modal per il volume
+        const volumeModal = document.getElementById('volume-modal');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const modalSlider = document.getElementById('modal-slider');
+        const modalIcon = document.getElementById('modal-icon');
+        const modalTitle = document.getElementById('modal-title');
+        const volumePercentage = document.getElementById('volume-percentage');
+        
+        let currentSoundId = null;
+        
+        // Ottieni tutte le card dei suoni
+        const soundCards = document.querySelectorAll('.sound-item-card');
+        
+        // Aggiungi event listeners alle card
+        soundCards.forEach(card => {
+            card.addEventListener('click', function() {
+                if (screenLocked) return; // Non fare nulla se lo schermo è bloccato
+                
+                // Ottieni i dati del suono
+                const soundId = this.dataset.sound;
+                const soundLabel = this.querySelector('.sound-label').textContent;
+                const soundIcon = this.querySelector('.sound-icon i').className;
+                
+                // Imposta i dati nel modal
+                currentSoundId = soundId;
+                modalTitle.textContent = soundLabel;
+                modalIcon.className = soundIcon;
+                
+                // Imposta il valore dello slider
+                if (sounds[soundId]) {
+                    const volumeValue = sounds[soundId].volume * 100 || 0;
+                    modalSlider.value = volumeValue;
+                    volumePercentage.textContent = `${Math.round(volumeValue)}%`;
+                } else {
+                    modalSlider.value = 0;
+                    volumePercentage.textContent = "0%";
+                }
+                
+                // Mostra il modal
+                volumeModal.classList.remove('hidden');
+                
+                // Sblocca l'audio se necessario
+                if (!audioUnlocked) {
+                    unlockAudio();
+                }
+            });
+        });
+        
+        // Event listener per lo slider del modal
+        modalSlider.addEventListener('input', function() {
+            if (!currentSoundId) return;
+            
+            const volume = this.value / 100;
+            volumePercentage.textContent = `${Math.round(this.value)}%`;
+            
+            // Riproduci il suono con il volume impostato
+            if (isIOS) {
+                playIOSSoundWithWebAudio(currentSoundId, volume);
+            } else {
+                playStandardSound(currentSoundId, volume);
+            }
+            
+            // Aggiorna l'indicatore visivo sulla card
+            updateSoundCardStatus(currentSoundId, volume);
+            
+            // Controlla se almeno un suono è attivo per aggiornare il pulsante di stop
+            checkActiveSounds();
+        });
+        
+        // Chiudi il modal
+        closeModalBtn.addEventListener('click', function() {
+            volumeModal.classList.add('hidden');
+            currentSoundId = null;
+        });
+        
+        // Chiudi il modal quando si fa click fuori dal contenuto
+        volumeModal.addEventListener('click', function(event) {
+            if (event.target === volumeModal) {
+                volumeModal.classList.add('hidden');
+                currentSoundId = null;
+            }
+        });
+        
+        // Funzione per aggiornare lo stato visivo delle card
+        function updateSoundCardStatus(soundId, volume) {
+            soundCards.forEach(card => {
+                if (card.dataset.sound === soundId) {
+                    if (volume > 0) {
+                        card.classList.add('active');
+                    } else {
+                        card.classList.remove('active');
+                    }
+                }
+            });
+        }
+        
+        // Inizializza lo stato delle card in base ai suoni attivi
+        function initializeCardStatus() {
+            for (const soundId in sounds) {
+                if (sounds[soundId] && sounds[soundId].volume > 0) {
+                    updateSoundCardStatus(soundId, sounds[soundId].volume);
+                }
+            }
+            
+            // Controlla se ci sono suoni attivi per aggiornare il pulsante di stop
+            checkActiveSounds();
+        }
+        
+        // Esegui l'inizializzazione dopo il caricamento
+        setTimeout(initializeCardStatus, 1000);
+        
+        // Sblocco globale al primo tocco
+        document.addEventListener('touchstart', function() {
+            if (!audioUnlocked) {
+                unlockAudio();
+            }
+        }, {once: true});
+
+        //TIMER
+        // Variabili per il timer
+        let timerInterval;
+        let timerEndTime = null;
+
+        // Ottieni riferimenti agli elementi del timer
+        const timerBtn = document.getElementById('timer-btn');
+        const timerModal = document.getElementById('timer-modal');
+        const closeTimerModalBtn = document.getElementById('close-timer-modal-btn');
+        const timerOptions = document.querySelectorAll('.timer-option');
+        const customTimerMinutes = document.getElementById('custom-timer-minutes');
+        const setCustomTimerBtn = document.getElementById('set-custom-timer-btn');
+        const timerStatus = document.getElementById('timer-status');
+        const timerCountdownText = document.getElementById('timer-countdown-text');
+
+        // Apertura del modale del timer
+        timerBtn.addEventListener('click', function() {
+            if (screenLocked) return; // Non fare nulla se lo schermo è bloccato
+            
+            // Mostra il modale
+            timerModal.classList.remove('hidden');
+            
+            // Aggiorna la UI del modale con lo stato attuale del timer
+            updateTimerModalUI();
+        });
+
+        // Chiusura del modale del timer
+        closeTimerModalBtn.addEventListener('click', function() {
+            timerModal.classList.add('hidden');
+        });
+
+        // Chiudi il modale quando si fa click fuori dal contenuto
+        timerModal.addEventListener('click', function(event) {
+            if (event.target === timerModal) {
+                timerModal.classList.add('hidden');
+            }
+        });
+
+        // Gestione dei pulsanti del timer predefiniti
+        timerOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                const minutes = parseInt(this.dataset.minutes);
+                
+                // Rimuovi la classe active da tutti i pulsanti
+                timerOptions.forEach(opt => opt.classList.remove('active'));
+                
+                if (minutes === 0) {
+                    // Disattivazione del timer
+                    clearTimer();
+                    this.classList.add('active');
+                } else {
+                    // Attivazione di un nuovo timer
+                    startTimer(minutes);
+                    this.classList.add('active');
+                }
+                
+                // Aggiorna l'interfaccia
+                updateTimerModalUI();
+            });
+        });
+
+        // Gestione del timer personalizzato
+        setCustomTimerBtn.addEventListener('click', function() {
+            const minutes = parseInt(customTimerMinutes.value);
+            
+            if (isNaN(minutes) || minutes <= 0 || minutes > 720) {
+                // Mostra feedback visivo di errore
+                customTimerMinutes.style.borderColor = 'red';
+                setTimeout(() => {
+                    customTimerMinutes.style.borderColor = '';
+                }, 1500);
+                return;
+            }
+            
+            // Rimuovi la classe active da tutti i pulsanti predefiniti
+            timerOptions.forEach(opt => opt.classList.remove('active'));
+            
+            // Avvia il timer personalizzato
+            startTimer(minutes);
+            
+            // Aggiorna l'interfaccia
+            updateTimerModalUI();
+            
+            // Pulisci l'input
+            customTimerMinutes.value = '';
+        });
+
+        // Avvia un nuovo timer
+        function startTimer(minutes) {
+            // Pulisci eventuali timer esistenti
+            clearInterval(timerInterval);
+            
+            // Calcola quando il timer deve scadere
+            const now = new Date();
+            timerEndTime = new Date(now.getTime() + minutes * 60000);
+            
+            // Aggiorna l'indicatore di timer attivo
+            timerBtn.classList.add('active');
+            
+            // Mostra lo stato del timer nel modale
+            updateTimerCountdown();
+            timerStatus.classList.remove('hidden');
+            
+            // Avvia l'intervallo per aggiornare il countdown
+            timerInterval = setInterval(function() {
+                if (updateTimerCountdown()) {
+                    // Il timer è scaduto
+                    timerExpired();
+                }
+            }, 1000);
+            
+            console.log(`Timer impostato per ${minutes} minuti`);
+        }
+
+        // Aggiorna il countdown visualizzato
+        function updateTimerCountdown() {
+            if (!timerEndTime) return false;
+            
+            const now = new Date();
+            const timeLeft = timerEndTime - now;
+            
+            if (timeLeft <= 0) {
+                // Il timer è scaduto
+                timerCountdownText.textContent = "00:00:00";
+                return true;
+            }
+            
+            // Calcola ore, minuti e secondi rimanenti
+            const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+            
+            // Formatta il testo del countdown
+            const formattedHours = String(hours).padStart(2, '0');
+            const formattedMinutes = String(minutes).padStart(2, '0');
+            const formattedSeconds = String(seconds).padStart(2, '0');
+            
+            timerCountdownText.textContent = `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+            
+            return false;
+        }
+
+        // Gestione della scadenza del timer
+        function timerExpired() {
+            // Ferma tutti i suoni
+            stopAllSounds();
+            
+            // Pulisci il timer
+            clearTimer();
+            
+            // Mostra una notifica che il timer è scaduto
+            showTimerExpiredNotification();
+            
+            console.log('Timer scaduto: tutti i suoni sono stati fermati');
+        }
+
+        // Pulisci il timer
+        function clearTimer() {
+            clearInterval(timerInterval);
+            timerEndTime = null;
+            timerBtn.classList.remove('active');
+            timerStatus.classList.add('hidden');
+            
+            // Deseleziona tutte le opzioni tranne "Disattiva"
+            timerOptions.forEach(opt => {
+                if (opt.dataset.minutes !== '0') {
+                    opt.classList.remove('active');
+                }
+            });
+            
+            console.log('Timer disattivato');
+        }
+
+        // Aggiorna l'interfaccia del modale del timer
+        function updateTimerModalUI() {
+            // Nascondi lo stato se non c'è un timer attivo
+            if (!timerEndTime) {
+                timerStatus.classList.add('hidden');
+                
+                // Attiva solo il pulsante "Disattiva"
+                timerOptions.forEach(opt => {
+                    if (opt.dataset.minutes === '0') {
+                        opt.classList.add('active');
+                    } else {
+                        opt.classList.remove('active');
+                    }
+                });
+            } else {
+                // Mostra lo stato del timer
+                updateTimerCountdown();
+                timerStatus.classList.remove('hidden');
+                
+                // Nessun pulsante attivo, poiché il timer potrebbe essere personalizzato
+                timerOptions.forEach(opt => opt.classList.remove('active'));
+            }
+        }
+
+        // Mostra una notifica quando il timer è scaduto
+        function showTimerExpiredNotification() {
+            // Crea l'elemento di notifica
+            const notification = document.createElement('div');
+            notification.className = 'timer-expired-notification';
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <i class="fas fa-clock"></i>
+                    <p>Timer scaduto! I suoni sono stati fermati.</p>
+                </div>
+            `;
+            
+            // Aggiungi la notifica al DOM
+            document.body.appendChild(notification);
+            
+            // Mostra la notifica con animazione
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
+            // Nascondi e rimuovi la notifica dopo alcuni secondi
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 4000);
+        }
+
+        // Stili CSS aggiuntivi per la notifica
+        const timerExpiredStyle = document.createElement('style');
+        timerExpiredStyle.textContent = `
+        .timer-expired-notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(10, 132, 255, 0.9);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .timer-expired-notification.show {
+            opacity: 1;
+        }
+
+        .notification-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .notification-content i {
+            font-size: 20px;
+        }
+
+        .notification-content p {
+            font-size: 16px;
+            font-weight: 500;
+            margin: 0;
+        }
+        `;
+        document.head.appendChild(timerExpiredStyle);
+
+        // Verifica e ripristina il timer se necessario al caricamento della pagina
+        function checkForActiveTimer() {
+            // Verifica se c'è un timer salvato nel localStorage
+            const savedTimer = localStorage.getItem('serenityTimer');
+            
+            if (savedTimer) {
+                const timerData = JSON.parse(savedTimer);
+                const now = new Date();
+                const endTime = new Date(timerData.endTime);
+                
+                // Se il timer non è ancora scaduto
+                if (endTime > now) {
+                    // Ripristina il timer
+                    timerEndTime = endTime;
+                    timerBtn.classList.add('active');
+                    
+                    // Avvia l'intervallo per aggiornare il countdown
+                    timerInterval = setInterval(function() {
+                        if (updateTimerCountdown()) {
+                            // Il timer è scaduto
+                            timerExpired();
+                        }
+                    }, 1000);
+                    
+                    console.log('Timer ripristinato dal localStorage');
+                } else {
+                    // Il timer è già scaduto, rimuovilo dal localStorage
+                    localStorage.removeItem('serenityTimer');
+                }
+            }
+        }
+
+        // Salva il timer nel localStorage quando viene modificato
+        function saveTimerToLocalStorage() {
+            if (timerEndTime) {
+                const timerData = {
+                    endTime: timerEndTime.toISOString()
+                };
+                localStorage.setItem('serenityTimer', JSON.stringify(timerData));
+            } else {
+                localStorage.removeItem('serenityTimer');
+            }
+        }
+
+        // Aggiungi listener per salvare il timer
+        window.addEventListener('beforeunload', saveTimerToLocalStorage);
+
+        // Controlla se c'è un timer attivo al caricamento della pagina
+        document.addEventListener('DOMContentLoaded', function() {
+            // La funzione viene chiamata dopo che gli slider sono stati inizializzati
+            setTimeout(checkForActiveTimer, 2000);
+        });
     }
 
     // Messaggio di debug
     console.log("Serenity app inizializzata");
 });
+
+// Registrazione del Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then((registration) => {
+        console.log('Service Worker registrato con successo:', registration.scope);
+      })
+      .catch((error) => {
+        console.log('Registrazione Service Worker fallita:', error);
+      });
+  });
+}
+
+// Gestione dell'installazione PWA
+let deferredPrompt;
+const installContainer = document.getElementById('install-container');
+const installBtn = document.getElementById('install-btn');
+const installSuccess = document.getElementById('install-success');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Previene la visualizzazione del prompt predefinito
+    e.preventDefault();
+    
+    // Salva l'evento per mostrarlo in seguito
+    deferredPrompt = e;
+    
+    // Mostra il pulsante di installazione
+    installContainer.style.display = 'block';
+    
+    console.log('L\'app può essere installata');
+});
+
+// Evento click sul pulsante di installazione
+installBtn.addEventListener('click', () => {
+    // Verifica se l'evento deferredPrompt è disponibile
+    if (!deferredPrompt) {
+        console.log('Evento di installazione non disponibile');
+        return;
+    }
+    
+    // Mostra il prompt di installazione
+    deferredPrompt.prompt();
+    
+    // Nascondi il pulsante di installazione durante il prompt
+    installContainer.style.display = 'none';
+    
+    // Attende la scelta dell'utente
+    deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+            console.log('Utente ha accettato l\'installazione');
+            showInstallSuccess();
+        } else {
+            console.log('Utente ha rifiutato l\'installazione');
+            // Mostra di nuovo il pulsante se l'utente rifiuta
+            setTimeout(() => {
+                installContainer.style.display = 'block';
+            }, 3000);
+        }
+        
+        // Reset della variabile prompt
+        deferredPrompt = null;
+    });
+});
+
+// Mostra il messaggio di installazione completata
+function showInstallSuccess() {
+    installSuccess.classList.add('show');
+    
+    // Nascondi il messaggio dopo 3 secondi
+    setTimeout(() => {
+        installSuccess.classList.remove('show');
+    }, 3000);
+}
+
+// Controlla se l'app è già installata
+window.addEventListener('appinstalled', (evt) => {
+    console.log('App installata con successo!');
+    installContainer.style.display = 'none';
+    showInstallSuccess();
+});
+
+// Verifica se l'app è già in modalità standalone (già installata)
+if (window.matchMedia('(display-mode: standalone)').matches || 
+    window.navigator.standalone === true) {
+    console.log('App già installata e in esecuzione in modalità standalone');
+    installContainer.style.display = 'none';
+}
+
+// Aggiungi una funzione per mostrare il pulsante di installazione manualmente
+function showInstallPrompt() {
+    if (deferredPrompt) {
+        installContainer.style.display = 'block';
+    }
+}
+
+// Funzione per controllare periodicamente se l'app può essere installata
+function checkInstallability() {
+    // Su iOS, navigator.standalone è true se l'app è installata
+    const isIOSInstalled = window.navigator.standalone === true;
+    
+    // Su altri browser, matchMedia controlla la modalità display
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+    
+    // Se già installata, nascondi il pulsante
+    if (isIOSInstalled || isStandalone) {
+        installContainer.style.display = 'none';
+    } 
+    // Altrimenti, se l'evento di installazione è disponibile, mostra il pulsante
+    else if (deferredPrompt) {
+        installContainer.style.display = 'block';
+    }
+}
+
+// Controlla ogni 5 secondi se l'app può essere installata
+setInterval(checkInstallability, 5000);
+
+// Gestione media query per rilevare cambiamenti nella modalità di visualizzazione
+window.matchMedia('(display-mode: standalone)').addEventListener('change', (e) => {
+    if (e.matches) {
+        console.log('App ora in modalità standalone');
+        installContainer.style.display = 'none';
+    }
+});
+
+// Verifica lo stato della connessione all'avvio
+document.addEventListener('DOMContentLoaded', function() {
+  checkConnectionAndCacheStatus();
+});
+
+// Verifica se l'app è online e se tutti i suoni sono in cache
+function checkConnectionAndCacheStatus() {
+  const isOnline = navigator.onLine;
+  console.log('Stato connessione:', isOnline ? 'Online' : 'Offline');
+  
+  if (!isOnline) {
+    // Se siamo offline, verifichiamo che tutti i file audio siano in cache
+    const soundFiles = [
+        'white-noise.mp3',
+        'brown-noise.mp3',
+        'pink-noise.mp3',
+        'rain.wav',
+        'storm.mp3',
+        'wind.mp3',
+        'stream.mp3',
+        'birds.mp3',
+        'waves.mp3',
+        'boat.mp3',
+        'city.mp3',
+        'fireplace.mp3',
+        'hair-dryer.mp3'
+    ];
+    
+    Promise.all(
+      soundFiles.map(file => {
+        return caches.match(`sounds/${file}`)
+          .then(response => {
+            if (!response) {
+              console.warn(`Il file audio ${file} non è disponibile offline`);
+              return false;
+            }
+            return true;
+          });
+      })
+    ).then(results => {
+      const allCached = results.every(result => result === true);
+      if (!allCached) {
+        // Mostra un avviso che alcuni suoni potrebbero non essere disponibili
+        showOfflineWarning();
+      }
+    });
+  }
+}
+
+// Mostra un avviso per l'utente quando è offline e mancano file audio
+function showOfflineWarning() {
+  const warningElement = document.createElement('div');
+  warningElement.className = 'offline-warning';
+  warningElement.innerHTML = `
+    <div class="offline-warning-content">
+      <i class="fas fa-wifi"></i>
+      <p>Sei offline. Alcuni suoni potrebbero non essere disponibili.</p>
+      <button class="offline-dismiss">OK</button>
+    </div>
+  `;
+  
+  document.body.appendChild(warningElement);
+  
+  // Pulsante per chiudere l'avviso
+  warningElement.querySelector('.offline-dismiss').addEventListener('click', function() {
+    warningElement.remove();
+  });
+}
+
+// Aggiungi stile CSS per l'avviso offline
+const offlineStyle = document.createElement('style');
+offlineStyle.textContent = `
+.offline-warning {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(255, 171, 0, 0.9);
+  color: #000;
+  padding: 10px;
+  text-align: center;
+  z-index: 9999;
+  font-size: 14px;
+}
+
+.offline-warning-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.offline-warning i {
+  font-size: 18px;
+}
+
+.offline-dismiss {
+  background: transparent;
+  border: 1px solid #000;
+  border-radius: 4px;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+`;
+document.head.appendChild(offlineStyle);
+
+// Ascolta i cambiamenti di connettività
+window.addEventListener('online', checkConnectionAndCacheStatus);
+window.addEventListener('offline', checkConnectionAndCacheStatus);

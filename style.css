@@ -128,67 +128,6 @@ h2 {
     background: var(--accent-color);
 }
 
-/* Timer styles */
-.timer-container {
-    position: relative;
-}
-
-#timer-btn {
-    background: transparent;
-    border: none;
-    color: var(--dark-text);
-    font-size: 20px;
-    cursor: pointer;
-    padding: 8px;
-}
-
-#timer-modal {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    background-color: var(--dark-section-bg);
-    border-radius: 12px;
-    padding: 20px;
-    width: 250px;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
-    z-index: 10;
-}
-
-#timer-modal h3 {
-    font-size: 18px;
-    margin-bottom: 15px;
-    text-align: center;
-}
-
-.timer-options {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-.timer-options button {
-    background-color: rgba(255, 255, 255, 0.1);
-    border: none;
-    border-radius: 8px;
-    color: var(--dark-text);
-    padding: 10px 0;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.timer-options button:hover, 
-.timer-options button.active {
-    background-color: var(--accent-color);
-}
-
-#timer-status {
-    text-align: center;
-    font-size: 14px;
-    color: var(--dark-secondary-text);
-}
-
 .hidden {
     display: none;
 }
@@ -693,4 +632,1258 @@ html, body {
 .playing {
     color: var(--accent-color) !important;
     animation: pulse 2s infinite;
+}
+
+/* Aggiungi questo al tuo file CSS */
+/* Previene comportamenti strani su iOS quando installata come PWA */
+@media (display-mode: standalone) {
+  /* Previene lo zoom della pagina */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+  
+  /* Previene il rimbalzo della pagina */
+  html {
+    overscroll-behavior-y: none;
+  }
+  
+  /* Nasconde la barra degli indirizzi su alcuni browser */
+  body {
+    height: 100vh;
+    overflow: hidden;
+  }
+  
+  /* Contenitore principale con scrolling */
+  .container {
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Stile per il pulsante di installazione */
+.install-container {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    display: none; /* Inizialmente nascosto */
+}
+
+.install-btn {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 24px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(10, 132, 255, 0.3);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    animation: pulse-subtle 2s infinite;
+}
+
+.install-btn:hover {
+    background-color: #0070e0;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(10, 132, 255, 0.4);
+}
+
+.install-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(10, 132, 255, 0.3);
+}
+
+.install-btn i {
+    font-size: 18px;
+}
+
+/* Animazione sottile per attirare l'attenzione */
+@keyframes pulse-subtle {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Banner di installazione completata */
+.install-success {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(40, 167, 69, 0.9);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.install-success.show {
+    opacity: 1;
+}
+
+.install-success i {
+    font-size: 18px;
+}
+
+/* Stile per il pulsante di installazione in dispositivi già installati */
+@media (display-mode: standalone) {
+    .install-container {
+        display: none !important;
+    }
+}
+
+/* Soluzione per rendere cliccabile solo il pallino dello slider */
+input[type=range] {
+  pointer-events: none; /* Disabilita eventi sulla barra */
+  background: transparent; /* Rende la barra trasparente */
+}
+
+/* Rendi il thumb cliccabile */
+input[type=range]::-webkit-slider-thumb {
+  pointer-events: auto; /* Solo il pallino accetta eventi */
+  cursor: grab;
+}
+
+input[type=range]::-moz-range-thumb {
+  pointer-events: auto;
+  cursor: grab;
+}
+
+input[type=range]::-ms-thumb {
+  pointer-events: auto;
+  cursor: grab;
+}
+
+/* Durante il trascinamento */
+input[type=range]::-webkit-slider-thumb:active {
+  cursor: grabbing;
+}
+
+input[type=range]::-moz-range-thumb:active {
+  cursor: grabbing;
+}
+
+input[type=range]::-ms-thumb:active {
+  cursor: grabbing;
+}
+
+/* Rendi l'aspetto visivo della barra mantenendo l'effetto originale */
+.volume-slider {
+  position: relative;
+}
+
+.volume-slider::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 4px;
+  width: 100%;
+  background: var(--slider-bg);
+  border-radius: 2px;
+  pointer-events: none; /* Assicura che questo elemento non riceva eventi */
+}
+
+/* Soluzione migliorata per rendere cliccabile solo il pallino dello slider */
+input[type=range] {
+  pointer-events: none; /* Disabilita eventi sulla barra */
+  background: transparent !important; /* Rende la barra trasparente */
+  z-index: 1; /* Assicura che lo slider sia sopra lo pseudo-elemento */
+  position: relative; /* Necessario per il z-index */
+}
+
+/* Rendi il thumb cliccabile e assicurati che sia sempre visibile */
+input[type=range]::-webkit-slider-thumb {
+  pointer-events: auto; /* Solo il pallino accetta eventi */
+  cursor: grab;
+  position: relative;
+  z-index: 3; /* Posiziona il thumb sopra la barra */
+}
+
+input[type=range]::-moz-range-thumb {
+  pointer-events: auto;
+  cursor: grab;
+  position: relative;
+  z-index: 3;
+}
+
+input[type=range]::-ms-thumb {
+  pointer-events: auto;
+  cursor: grab;
+  position: relative;
+  z-index: 3;
+}
+
+/* Durante il trascinamento */
+input[type=range]::-webkit-slider-thumb:active {
+  cursor: grabbing;
+}
+
+input[type=range]::-moz-range-thumb:active {
+  cursor: grabbing;
+}
+
+input[type=range]::-ms-thumb:active {
+  cursor: grabbing;
+}
+
+/* Miglioramento per la barra visiva */
+.volume-slider {
+  position: relative;
+}
+
+/* Barra visiva dello slider che rispetta i limiti */
+.volume-slider::before {
+  content: "";
+  position: absolute;
+  left: 9px; /* Aggiusta per evitare che vada oltre i limiti */
+  right: 9px; /* Aggiusta per evitare che vada oltre i limiti */
+  top: 50%;
+  transform: translateY(-50%);
+  height: 4px;
+  width: auto; /* Usa auto invece di 100% */
+  background: var(--slider-bg);
+  border-radius: 2px;
+  pointer-events: none; /* Assicura che questo elemento non riceva eventi */
+  z-index: 0; /* Posiziona sotto lo slider */
+}
+
+/* Assicurati che l'hover sul thumb non mostri la barra sopra */
+input[type=range]:hover::-webkit-slider-thumb {
+  z-index: 3;
+}
+
+input[type=range]:hover::-moz-range-thumb {
+  z-index: 3;
+}
+
+input[type=range]:hover::-ms-thumb {
+  z-index: 3;
+}
+
+/* Aggiunge un padding che migliora l'aspetto complessivo */
+.slider {
+  padding: 2px 0; /* Aggiunge spazio sopra e sotto */
+}
+
+/* Garantisce che quando il thumb è sopra la barra, sia sempre visibile */
+.slider:hover {
+  z-index: 2; /* Aumenta il z-index durante hover */
+}
+
+/* Aggiunta per garantire che il thumb sia sempre visibile e in primo piano */
+input[type=range]:focus::-webkit-slider-thumb {
+  z-index: 4; /* Ancora più alto quando in focus */
+  box-shadow: 0 0 0 2px var(--accent-color); /* Effetto focus visibile */
+}
+
+input[type=range]:focus::-moz-range-thumb {
+  z-index: 4;
+  box-shadow: 0 0 0 2px var(--accent-color);
+}
+
+/* Rafforza la barra per assicurarsi che rispetti i limiti */
+.volume-slider::before {
+  box-sizing: border-box; /* Garantisce che il padding non influisca sulla larghezza */
+}
+
+/* Soluzione per rendere cliccabile solo il pallino dello slider */
+input[type=range] {
+  pointer-events: none; /* Disabilita eventi sulla barra */
+  background: transparent !important; /* Rende la barra trasparente */
+  z-index: 1; /* Assicura che lo slider sia sopra lo pseudo-elemento */
+  position: relative; /* Necessario per il z-index */
+}
+
+/* Rendi il thumb cliccabile */
+input[type=range]::-webkit-slider-thumb {
+  pointer-events: auto; /* Solo il pallino accetta eventi */
+  cursor: grab;
+  position: relative;
+  z-index: 3; /* Posiziona il thumb sopra la barra */
+}
+
+input[type=range]::-moz-range-thumb {
+  pointer-events: auto;
+  cursor: grab;
+  position: relative;
+  z-index: 3;
+}
+
+/* Durante il trascinamento */
+input[type=range]::-webkit-slider-thumb:active {
+  cursor: grabbing;
+}
+
+input[type=range]::-moz-range-thumb:active {
+  cursor: grabbing;
+}
+
+/* Configurazione migliorata per la barra visiva */
+.volume-slider {
+  position: relative;
+}
+
+/* Barra visiva dello slider che rispetta i limiti - versione migliorata */
+.volume-slider::before {
+  content: "";
+  position: absolute;
+  /* Calcolo preciso della posizione orizzontale */
+  left: 14px; /* Valore aumentato per compensare il thumb */
+  right: 14px; /* Valore aumentato per compensare il thumb */
+  top: 50%;
+  transform: translateY(-50%);
+  height: 4px;
+  width: auto; /* Usa auto invece di 100% */
+  background: var(--slider-bg);
+  border-radius: 2px;
+  pointer-events: none; /* Assicura che questo elemento non riceva eventi */
+  z-index: 0; /* Posiziona sotto lo slider */
+}
+
+/* Assicurati che l'hover sul thumb non mostri la barra sopra */
+input[type=range]:hover::-webkit-slider-thumb {
+  z-index: 3;
+}
+
+input[type=range]:hover::-moz-range-thumb {
+  z-index: 3;
+}
+
+/* Aggiunge un padding che migliora l'aspetto complessivo */
+.slider {
+  padding: 2px 0; /* Aggiunge spazio sopra e sotto */
+  margin: 0; /* Assicura che non ci siano margini che influenzano la posizione */
+}
+
+/* Garantisce che quando il thumb è sopra la barra, sia sempre visibile */
+.slider:hover {
+  z-index: 2; /* Aumenta il z-index durante hover */
+}
+
+/* Migliora l'aspetto del container dello slider */
+.volume-slider {
+  padding: 0; /* Rimuove padding che potrebbero influenzare la posizione */
+  box-sizing: border-box; /* Garantisce calcoli coerenti */
+}
+
+/* Approccio alternativo per la barra visiva */
+.volume-slider::before {
+  content: "";
+  position: absolute;
+  /* Calcolo ancora più preciso basato sul thumb */
+  width: calc(100% - 28px); /* Sottrai la larghezza del thumb */
+  left: 14px; /* Metà della larghezza del thumb */
+  top: 50%;
+  transform: translateY(-50%);
+  height: 4px;
+  background: var(--slider-bg);
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Soluzione per rendere cliccabile solo il pallino dello slider */
+input[type=range] {
+  pointer-events: none; /* Disabilita eventi sulla barra */
+  background: transparent !important; /* Rende la barra trasparente */
+  z-index: 1; /* Assicura che lo slider sia sopra lo pseudo-elemento */
+  position: relative; /* Necessario per il z-index */
+  -webkit-appearance: none; /* Rimuove lo stile predefinito per maggiore controllo */
+  appearance: none;
+  height: 30px; /* Altezza aumentata per garantire spazio sufficiente */
+  margin: 0; /* Rimuove i margini che possono causare disallineamenti */
+  vertical-align: middle; /* Allineamento verticale */
+}
+
+/* Migliora l'allineamento verticale del thumb */
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  pointer-events: auto; /* Solo il pallino accetta eventi */
+  cursor: grab;
+  position: relative;
+  z-index: 3; /* Posiziona il thumb sopra la barra */
+  width: 18px; /* Valore esatto dai tuoi CSS originali */
+  height: 18px; /* Valore esatto dai tuoi CSS originali */
+  border-radius: 50%;
+  background: var(--slider-thumb);
+  margin-top: -7px; /* ESSENZIALE: Centra verticalmente il thumb rispetto alla barra */
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); /* Dall'originale */
+}
+
+input[type=range]::-moz-range-thumb {
+  pointer-events: auto;
+  cursor: grab;
+  position: relative;
+  z-index: 3;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--slider-thumb);
+  border: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition: all 0.15s ease;
+}
+
+/* Durante il trascinamento */
+input[type=range]::-webkit-slider-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.2);
+  background: var(--accent-color);
+}
+
+input[type=range]::-moz-range-thumb:active {
+  cursor: grabbing;
+  transform: scale(1.2);
+  background: var(--accent-color);
+}
+
+/* Aggiunge il track personalizzato per la barra */
+input[type=range]::-webkit-slider-runnable-track {
+  -webkit-appearance: none;
+  height: 4px; /* Altezza della barra */
+  background: transparent; /* Trasparente perché usiamo lo pseudo-elemento */
+  border-radius: 2px;
+  cursor: default;
+}
+
+input[type=range]::-moz-range-track {
+  height: 4px;
+  background: transparent;
+  border-radius: 2px;
+  cursor: default;
+}
+
+/* Barra visiva dello slider che rispetta i limiti - versione migliorata */
+.volume-slider {
+  position: relative;
+  display: flex;
+  align-items: center; /* Centra verticalmente */
+  height: 30px; /* Altezza esplicita */
+}
+
+/* Barra visiva personalizzata con allineamento preciso */
+.volume-slider::before {
+  content: "";
+  position: absolute;
+  left: 9px; /* Regolabile in base al design */
+  right: 9px; /* Regolabile in base al design */
+  top: 50%; /* Centratura verticale */
+  transform: translateY(-50%); /* Centratura verticale */
+  height: 4px; /* Altezza della barra */
+  width: auto;
+  background: var(--slider-bg);
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Assicurati che il container dello slider abbia spazio sufficiente */
+.sound-item {
+  display: flex;
+  align-items: center; /* Centra tutti gli elementi verticalmente */
+}
+
+/* Assicurati che il container dello slider abbia una larghezza adeguata */
+.volume-slider {
+  flex: 1;
+  box-sizing: border-box;
+}
+
+/* Nuovi stili per la griglia di elementi sonori */
+.sound-items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.sound-item-card {
+    background-color: var(--dark-section-bg);
+    border-radius: 12px;
+    padding: 20px 15px;
+    text-align: center;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.sound-item-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.sound-item-card:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.sound-icon {
+    font-size: 28px;
+    margin-bottom: 12px;
+    color: var(--dark-secondary-text);
+    transition: color 0.2s ease;
+}
+
+.sound-label {
+    font-size: 16px;
+    color: var(--dark-text);
+    font-weight: 500;
+}
+
+/* Indicatore di suono attivo */
+.sound-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    opacity: 0;
+    transition: all 0.3s ease;
+    background-color: var(--accent-color);
+}
+
+.sound-item-card.active .sound-indicator {
+    opacity: 1;
+}
+
+.sound-item-card.active .sound-icon {
+    color: var(--accent-color);
+}
+
+/* Stili per il modale del volume */
+.volume-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.volume-modal-content {
+    background-color: var(--dark-section-bg);
+    border-radius: 16px;
+    width: 90%;
+    max-width: 400px;
+    padding: 25px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.volume-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.sound-info-modal {
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+}
+
+.sound-info-modal i {
+    margin-right: 15px;
+    font-size: 24px;
+    color: var(--accent-color);
+}
+
+#close-modal-btn {
+    background: transparent;
+    border: none;
+    color: var(--dark-secondary-text);
+    font-size: 20px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+#close-modal-btn:hover {
+    color: var(--dark-text);
+}
+
+.volume-slider-container {
+    padding: 10px 0;
+}
+
+#modal-slider {
+    width: 100%;
+    height: 10px;
+    border-radius: 5px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: var(--slider-bg);
+    outline: none;
+    margin-bottom: 15px;
+}
+
+#modal-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    transition: all 0.15s ease;
+}
+
+#modal-slider::-moz-range-thumb {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    transition: all 0.15s ease;
+    border: none;
+}
+
+#modal-slider::-webkit-slider-thumb:active {
+    transform: scale(1.1);
+}
+
+#modal-slider::-moz-range-thumb:active {
+    transform: scale(1.1);
+}
+
+.volume-value {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--dark-text);
+}
+
+/* Aggiustamenti per schermi piccoli */
+@media (max-width: 480px) {
+    .sound-items-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 10px;
+    }
+    
+    .sound-item-card {
+        padding: 15px 10px;
+    }
+    
+    .sound-icon {
+        font-size: 24px;
+        margin-bottom: 8px;
+    }
+    
+    .sound-label {
+        font-size: 14px;
+    }
+    
+    .volume-modal-content {
+        width: 95%;
+        padding: 20px;
+    }
+}
+
+/* Animazione per il popup del volume */
+@keyframes scaleIn {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.volume-modal:not(.hidden) .volume-modal-content {
+    animation: scaleIn 0.3s ease forwards;
+}
+
+/* Miglioramento dello slider nel modale */
+#modal-slider {
+    width: 100%;
+    height: 10px;
+    border-radius: 5px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: var(--slider-bg) !important; /* Forza il colore di sfondo */
+    outline: none;
+    margin-bottom: 15px;
+    opacity: 1; /* Assicura che lo slider sia completamente visibile */
+    position: relative;
+    z-index: 1;
+}
+
+/* Migliora la visibilità della traccia dello slider */
+#modal-slider::-webkit-slider-runnable-track {
+    height: 10px;
+    border-radius: 5px;
+    background: var(--slider-bg);
+    cursor: pointer;
+}
+
+#modal-slider::-moz-range-track {
+    height: 10px;
+    border-radius: 5px;
+    background: var(--slider-bg);
+    cursor: pointer;
+}
+
+/* Stilizza il thumb dello slider con una dimensione ottimale */
+#modal-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    transition: all 0.15s ease;
+    margin-top: -9px; /* Centra il thumb sulla traccia */
+}
+
+#modal-slider::-moz-range-thumb {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    transition: all 0.15s ease;
+    border: none;
+}
+
+/* Effetto al passaggio del mouse o al tocco */
+#modal-slider:hover::-webkit-slider-thumb,
+#modal-slider:active::-webkit-slider-thumb {
+    transform: scale(1.1);
+    box-shadow: 0 2px 10px rgba(10, 132, 255, 0.5);
+}
+
+#modal-slider:hover::-moz-range-thumb,
+#modal-slider:active::-moz-range-thumb {
+    transform: scale(1.1);
+    box-shadow: 0 2px 10px rgba(10, 132, 255, 0.5);
+}
+
+/* Supporto aggiuntivo per lo sfondo della traccia in browser problematici */
+.volume-slider-container {
+    padding: 10px 0;
+    position: relative;
+}
+
+.volume-slider-container::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 10px;
+    background: var(--slider-bg);
+    border-radius: 5px;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Miglioramento dello slider nel modale - versione corretta */
+.volume-slider-container {
+    padding: 10px 0;
+    position: relative;
+}
+
+/* Rimuovi lo pseudo-elemento che creava la seconda linea */
+.volume-slider-container::before {
+    content: none; /* Disattiva la linea di backup */
+}
+
+/* Styling base dello slider */
+#modal-slider {
+    width: 100%;
+    height: 30px; /* Aumenta l'area cliccabile mantenendo la traccia sottile */
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent !important; /* Rendi lo sfondo trasparente */
+    outline: none;
+    margin-bottom: 15px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Stilizza la traccia dello slider in modo consistente su tutti i browser */
+#modal-slider::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 10px;
+    border-radius: 5px;
+    background: var(--slider-bg);
+    cursor: pointer;
+}
+
+#modal-slider::-moz-range-track {
+    width: 100%;
+    height: 10px;
+    border-radius: 5px;
+    background: var(--slider-bg);
+    cursor: pointer;
+}
+
+/* Stilizza il thumb dello slider */
+#modal-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    transition: all 0.15s ease;
+    margin-top: -9px; /* Centra il thumb sulla traccia */
+}
+
+#modal-slider::-moz-range-thumb {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    transition: all 0.15s ease;
+    border: none;
+    margin-top: -9px; /* Per Firefox */
+}
+
+/* Effetto al passaggio del mouse o al tocco */
+#modal-slider:hover::-webkit-slider-thumb,
+#modal-slider:active::-webkit-slider-thumb {
+    transform: scale(1.1);
+    box-shadow: 0 2px 10px rgba(10, 132, 255, 0.5);
+}
+
+#modal-slider:hover::-moz-range-thumb,
+#modal-slider:active::-moz-range-thumb {
+    transform: scale(1.1);
+    box-shadow: 0 2px 10px rgba(10, 132, 255, 0.5);
+}
+
+/* Stili per i controlli principali */
+.main-controls {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+    gap: 20px;
+}
+
+.control-button {
+    text-align: center;
+}
+
+.control-button button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--dark-section-bg);
+    border: none;
+    border-radius: 12px;
+    color: var(--dark-text);
+    padding: 15px;
+    width: 100px;
+    height: 100px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.control-button button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.control-button button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.control-button i {
+    font-size: 32px;
+    margin-bottom: 8px;
+}
+
+.control-button span {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Stile specifico per il pulsante stop */
+#stop-btn:hover {
+    color: #ff3b30;
+}
+
+/* Animazione pulsazione per il pulsante stop quando attivo */
+#stop-btn.playing {
+    color: var(--accent-color);
+    animation: pulse 2s infinite;
+}
+
+/* Stile specifico per il pulsante blocca quando attivo */
+#lock-btn.locked {
+    color: var(--accent-color);
+}
+
+/* Responsive design per piccoli schermi */
+@media (max-width: 480px) {
+    .main-controls {
+        gap: 15px;
+    }
+    
+    .control-button button {
+        width: 90px;
+        height: 90px;
+        padding: 12px;
+    }
+    
+    .control-button i {
+        font-size: 28px;
+    }
+}
+
+/* Stili per il modal del timer */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header h3 {
+    font-size: 20px;
+    color: var(--dark-text);
+    font-weight: 500;
+}
+
+.modal-header button {
+    background: transparent;
+    border: none;
+    color: var(--dark-secondary-text);
+    font-size: 20px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.modal-header button:hover {
+    color: var(--dark-text);
+}
+
+/* Animazione per l'apertura del modale */
+@keyframes scaleIn {
+    0% { transform: scale(0.9); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Stili per il modale del timer */
+.modal-content {
+    background-color: var(--dark-section-bg);
+    border-radius: 16px;
+    width: 90%;
+    max-width: 400px;
+    padding: 25px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header h3 {
+    font-size: 20px;
+    color: var(--dark-text);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-header i {
+    color: var(--accent-color);
+}
+
+.modal-header button {
+    background: transparent;
+    border: none;
+    color: var(--dark-secondary-text);
+    font-size: 20px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.modal-header button:hover {
+    color: var(--dark-text);
+}
+
+/* Opzioni del timer */
+.timer-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.timer-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.timer-option {
+    flex: 1;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: none;
+    color: var(--dark-text);
+    padding: 15px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.timer-option:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.timer-option:active {
+    transform: translateY(0);
+}
+
+.timer-option.active {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+/* Input personalizzato per il timer */
+.timer-custom {
+    margin-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 20px;
+}
+
+.timer-custom-input {
+    display: flex;
+    gap: 10px;
+}
+
+#custom-timer-minutes {
+    flex: 1;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 12px 15px;
+    color: var(--dark-text);
+    font-size: 16px;
+}
+
+#custom-timer-minutes:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
+
+#set-custom-timer-btn {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+#set-custom-timer-btn:hover {
+    background-color: #0070e0;
+}
+
+/* Stato del timer */
+.timer-status {
+    margin-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 20px;
+}
+
+.timer-countdown {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    font-size: 24px;
+    color: var(--accent-color);
+}
+
+.timer-countdown i {
+    animation: pulse 2s infinite;
+}
+
+/* Stile specifico per il pulsante timer quando attivo */
+#timer-btn.active {
+    color: var(--accent-color);
+    animation: pulse 2s infinite;
+}
+
+/* Indicatore di timer attivo sulla icona */
+.timer-indicator {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--accent-color);
+    animation: pulse 2s infinite;
+    display: none;
+}
+
+#timer-btn.active .timer-indicator {
+    display: block;
+}
+
+/* Animazione per gli indicatori */
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Responsive per schermi piccoli */
+@media (max-width: 480px) {
+    .timer-option {
+        padding: 12px 8px;
+        font-size: 14px;
+    }
+    
+    .timer-countdown {
+        font-size: 20px;
+    }
+}
+
+/* Nuovo stile per i pulsanti di controllo senza sfondo tipo card */
+.control-button button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent; /* Rimuove il background */
+    border: none;
+    color: var(--dark-text);
+    padding: 15px;
+    width: 100px;
+    height: 100px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Rimuove lo sfondo all'hover */
+.control-button button:hover {
+    transform: translateY(-2px);
+    box-shadow: none; /* Rimuove l'ombra */
+    background-color: transparent; /* Mantiene lo sfondo trasparente anche all'hover */
+}
+
+/* Rimuove l'effetto di pressione */
+.control-button button:active {
+    transform: translateY(0);
+    box-shadow: none; /* Rimuove l'ombra */
+}
+
+/* Stile specifico per il pulsante stop */
+#stop-btn:hover {
+    color: #ff3b30; /* Mantiene solo il cambio di colore */
+}
+
+/* Animazione pulsazione per il pulsante stop quando attivo */
+#stop-btn.playing {
+    color: var(--accent-color);
+    animation: pulse 2s infinite;
+    background-color: transparent; /* Assicura che non ci sia sfondo */
+}
+
+/* Stile specifico per il pulsante timer quando attivo */
+#timer-btn.active {
+    color: var(--accent-color);
+    animation: pulse 2s infinite;
+    background-color: transparent; /* Assicura che non ci sia sfondo */
+}
+
+/* Stile specifico per il pulsante blocca quando attivo */
+#lock-btn.locked {
+    color: var(--accent-color);
+    background-color: transparent; /* Assicura che non ci sia sfondo */
+}
+
+/* Se necessario, mantieni il responsive design per schermi piccoli */
+@media (max-width: 480px) {
+    .control-button button {
+        width: 90px;
+        height: 90px;
+        padding: 12px;
+    }
+    
+    .control-button i {
+        font-size: 28px;
+    }
 }
